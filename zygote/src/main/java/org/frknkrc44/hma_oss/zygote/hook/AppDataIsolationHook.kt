@@ -138,11 +138,12 @@ class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
                 STORAGE_MANAGER_SERVICE_CLASS,
                 "onVolumeStateChangedLocked",
             ) { param ->
-                if (service.config.altVoldAppDataIsolation) {
+                if (service.config.altVoldAppDataIsolation && !voldHookSkipped) {
                     val fuseEnabled = SystemProperties.getBoolean(FUSE_PROP, false)
 
                     if (!fuseEnabled) {
-                        logE(TAG, "StorageManagerService - FUSE storage is not enabled, disable hooks")
+                        logE(TAG, "StorageManagerService - FUSE storage is not enabled, skip vold hook")
+                        voldHookSkipped = true
                         return@hookBefore
                     }
 
@@ -167,7 +168,7 @@ class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
                 STORAGE_MANAGER_SERVICE_CLASS,
                 "remountAppStorageDirs",
             ) { param ->
-                if (service.config.altVoldAppDataIsolation && service.config.skipSystemAppDataIsolation) {
+                if (!voldHookSkipped && service.config.altVoldAppDataIsolation && service.config.skipSystemAppDataIsolation) {
                     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
                     val pidPkgMap = param.args!![1] as java.util.Map<*, *>
                     val userId = param.args[2] as Int
