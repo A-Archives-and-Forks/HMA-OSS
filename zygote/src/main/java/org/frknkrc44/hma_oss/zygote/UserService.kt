@@ -64,10 +64,10 @@ object UserService {
             val pkgInfo = getPackageInfoCompat(pms, BuildConfig.APP_PACKAGE_NAME, 0L, 0)
             if (pkgInfo != null) {
                 if (verifyAppSignature(pkgInfo.applicationInfo?.sourceDir)) {
-                    logI(TAG, "The app signature is verified successfully")
+                    logI(TAG, "The manager app signature is verified successfully")
                     service.appUid = pkgInfo.applicationInfo!!.uid
                 } else {
-                    throw AssertionError("The app itself is modified, skipping")
+                    throw AssertionError("The manager app is modified, skipping")
                 }
             }
             assert(service.appUid >= 0) {

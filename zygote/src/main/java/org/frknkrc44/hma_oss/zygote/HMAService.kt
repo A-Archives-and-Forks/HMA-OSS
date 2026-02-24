@@ -533,18 +533,18 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
         AppPresets.instance.apply {
             when (eventType) {
                 Intent.ACTION_PACKAGE_ADDED -> {
-                    if (handlePackageAdded(pms, packageName, presetCache)) {
-                        if (packageName == BuildConfig.APP_PACKAGE_NAME) {
-                            val pkgInfo = getPackageInfoCompat(pms, packageName, 0L, 0)
-                            if (verifyAppSignature(pkgInfo?.applicationInfo?.sourceDir)) {
-                                logI(TAG, "The app signature is verified successfully")
-                                appUid = pkgInfo!!.applicationInfo!!.uid
-                            } else {
-                                logE(TAG, "The app itself is modified, skipping")
-                                appUid = -1
-                            }
+                    if (packageName == BuildConfig.APP_PACKAGE_NAME && appUid < 0) {
+                        val pkgInfo = getPackageInfoCompat(pms, packageName, 0L, 0)
+                        if (verifyAppSignature(pkgInfo?.applicationInfo?.sourceDir)) {
+                            logI(TAG, "The manager app signature is verified successfully")
+                            appUid = pkgInfo!!.applicationInfo!!.uid
+                        } else {
+                            logE(TAG, "The manager app itself is modified, skipping")
+                            appUid = -1
                         }
+                    }
 
+                    if (handlePackageAdded(pms, packageName, presetCache)) {
                         writePresetCache()
                     }
                 }
@@ -554,10 +554,12 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
                         return
                     }
 
+                    if (packageName == BuildConfig.APP_PACKAGE_NAME && appUid >= 0) {
+                        logI(TAG, "The manager app is uninstalled")
+                        appUid = -1
+                    }
+
                     if (handlePackageRemoved(packageName, presetCache)) {
-                        if (packageName == BuildConfig.APP_PACKAGE_NAME) {
-                            appUid = -1
-                        }
 
                         writePresetCache()
                     }
