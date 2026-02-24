@@ -60,7 +60,7 @@ class BulkHooker private constructor() {
             }
 
             if (!value.replace) {
-                Transformers.invokeExact(original, frame)
+                Transformers.invokeExactPlain(original, frame)
             }
 
             if (value.replace && frame.type().returnType() != Void::class.java) {
@@ -85,7 +85,7 @@ class BulkHooker private constructor() {
             var throwable: Throwable? = null
 
             runCatching {
-                Transformers.invokeExact(original, frame)
+                Transformers.invokeExactPlain(original, frame)
             }.onFailure {
                 throwable = it
             }
