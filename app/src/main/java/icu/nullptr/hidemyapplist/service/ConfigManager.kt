@@ -42,8 +42,13 @@ object ConfigManager {
     fun init() {
         val configFileIsNew = !configFile.exists()
         if (configFileIsNew) {
-            config = JsonConfig()
-            configFile.writeText(config.toString())
+            runCatching {
+                val rawConfig = ServiceClient.readConfig()!!
+                config = JsonConfig.parse(rawConfig)
+            }.onFailure {
+                config = JsonConfig()
+                configFile.writeText(config.toString())
+            }
         }
         runCatching {
             if (!configFileIsNew) config = JsonConfig.parse(configFile.readText())
