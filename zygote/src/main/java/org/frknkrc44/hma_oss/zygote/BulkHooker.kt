@@ -60,7 +60,7 @@ class BulkHooker private constructor() {
             }
 
             if (!value.replace) {
-                Transformers.invokeExactPlain(original, frame)
+                Transformers.invokeExact(original, frame)
             }
 
             if (value.replace && frame.type().returnType() != Void::class.java) {
@@ -85,7 +85,7 @@ class BulkHooker private constructor() {
             var throwable: Throwable? = null
 
             runCatching {
-                Transformers.invokeExactPlain(original, frame)
+                Transformers.invokeExact(original, frame)
             }.onFailure {
                 throwable = it
             }
@@ -142,7 +142,7 @@ class BulkHooker private constructor() {
                                     logI(TAG, "Hooked: $executable")
                                 }
                                 Hooks.hook(
-                                    executable, Hooks.EntryPointType.DIRECT,
+                                    executable, Hooks.EntryPointType.CURRENT,
                                     element.impl, Hooks.EntryPointType.DIRECT
                                 )
 
