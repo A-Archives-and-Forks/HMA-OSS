@@ -3,10 +3,10 @@ package org.frknkrc44.hma_oss.zygote.hook
 import android.os.Build
 import android.os.SystemProperties
 import androidx.annotation.RequiresApi
-import icu.nullptr.hidemyapplist.common.Utils
 import org.frknkrc44.hma_oss.common.BuildConfig
 import org.frknkrc44.hma_oss.zygote.BulkHooker
 import org.frknkrc44.hma_oss.zygote.HMAService
+import org.frknkrc44.hma_oss.zygote.Utils4Zygote
 import org.frknkrc44.hma_oss.zygote.Utils4Zygote.getBooleanField
 import org.frknkrc44.hma_oss.zygote.Utils4Zygote.getIntField
 import org.frknkrc44.hma_oss.zygote.Utils4Zygote.getObjectField
@@ -100,9 +100,7 @@ class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
                         getBooleanField(app, "appZygote")
                     }.getOrDefault(false)
 
-                    val apps = Utils.binderLocalScope {
-                        service.pms.getPackagesForUid(uid)
-                    } ?: return@hookAfter
+                    val apps = Utils4Zygote.getCallingApps(service, uid)
 
                     logD(
                         TAG,
@@ -171,28 +169,19 @@ class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
                 if (!voldHookSkipped && service.config.altVoldAppDataIsolation && service.config.skipSystemAppDataIsolation) {
                     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
                     val pidPkgMap = param.getArgument(1) as java.util.Map<*, *>
-                    val userId = param.getArgument(2) as Int
-
                     val keysToRemove = mutableSetOf<Any>()
 
                     for (entry in pidPkgMap.entrySet()) {
                         val pid = entry.key
                         val packageName = entry.value as String
 
-                        val apps = Utils.binderLocalScope {
-                            val uid = Utils.getPackageUidCompat(service.pms, packageName, 0L, userId)
-                            service.pms.getPackagesForUid(uid)
-                        } ?: continue
-
-                        for (app in apps) {
-                            if (app in service.systemApps || app == BuildConfig.APP_PACKAGE_NAME) {
-                                logD(
-                                    TAG,
-                                    "@remountAppStorageDirs SYSTEM $pid - $packageName is marked to remove"
-                                )
-                                keysToRemove += pid
-                                break
-                            }
+                        if (packageName in service.systemApps || packageName == BuildConfig.APP_PACKAGE_NAME) {
+                            logD(
+                                TAG,
+                                "@remountAppStorageDirs SYSTEM $pid - $packageName is marked to remove"
+                            )
+                            keysToRemove += pid
+                            break
                         }
                     }
 

@@ -117,6 +117,11 @@ object Utils4Zygote {
 
     fun getCallingApps(service: HMAService, callingUid: Int): Array<String> {
         if (callingUid == Constants.UID_SYSTEM) return arrayOf()
+        val cache = UidPackageNameCache.instance.findCacheEntryByUid(callingUid)
+        if (cache != null) {
+            return cache.second.toTypedArray()
+        }
+
         return Utils.binderLocalScope {
             service.pms.getPackagesForUid(callingUid)
         } ?: arrayOf()

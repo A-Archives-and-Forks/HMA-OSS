@@ -5,7 +5,6 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.Constants.VENDING_PACKAGE_NAME
-import icu.nullptr.hidemyapplist.common.Utils
 import org.frknkrc44.hma_oss.zygote.BulkHooker
 import org.frknkrc44.hma_oss.zygote.HMAService
 import org.frknkrc44.hma_oss.zygote.Utils4Zygote
@@ -158,9 +157,7 @@ class PmsHookTarget31(service: HMAService) : PmsHookTargetBase(service) {
                     logD(TAG, "@shouldFilterApplication caller cache: $callingUid, target: $targetApp")
                     return@hookBefore
                 }
-                val callingApps = Utils.binderLocalScope {
-                    service.pms.getPackagesForUid(callingUid)
-                } ?: return@hookBefore
+                val callingApps = Utils4Zygote.getCallingApps(service, callingUid)
                 val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
                 if (caller != null) {
                     param.result = true
@@ -173,6 +170,6 @@ class PmsHookTarget31(service: HMAService) : PmsHookTargetBase(service) {
             }
         }
 
-        super.load()
+        // super.load()
     }
 }

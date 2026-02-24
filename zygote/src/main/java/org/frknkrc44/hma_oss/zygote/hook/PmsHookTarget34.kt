@@ -108,9 +108,7 @@ class PmsHookTarget34(service: HMAService) : PmsHookTargetBase(service) {
                     logD(TAG, "@getArchivedPackageInternal caller cache: $callingUid, target: $targetApp")
                     return@hookBefore
                 }
-                val callingApps = Utils.binderLocalScope {
-                    service.pms.getPackagesForUid(callingUid)
-                } ?: return@hookBefore
+                val callingApps = Utils4Zygote.getCallingApps(service, callingUid)
                 val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
                 if (caller != null) {
                     param.result = null
