@@ -173,7 +173,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
 
             if (service.pmn != null) {
                 hookBefore(
-                    service::pmn::class.java.name,
+                    service.pmn.javaClass.name,
                     "getInstallerForPackage",
                 ) { param ->
                     val query = param.getArgument(1) as? String ?: return@hookBefore
@@ -199,7 +199,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 hookBefore(
-                    service::pms::class.java.name,
+                    service.pms.javaClass.name,
                     "getInstallSourceInfo",
                 ) { param ->
                     val query = param.getArgument(1) as? String ?: return@hookBefore
@@ -224,7 +224,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
             }
 
             hookBefore(
-                service::pms::class.java.name,
+                service.pms.javaClass.name,
                 "getInstallerPackageName",
             ) { param ->
                 val query = param.getArgument(1) as? String ?: return@hookBefore
