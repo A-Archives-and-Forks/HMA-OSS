@@ -81,13 +81,8 @@ object Utils4Zygote {
         return service
     }
 
-    fun getPackageNameFromPackageSettings(packageSettings: Any): String? {
-        return runCatching {
-            packageSettings::class.java.getField(
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) "mName" else "name"
-            ).apply { isAccessible = true }.get(packageSettings) as? String
-        }.getOrNull()
-    }
+    fun getPackageNameFromPackageSettings(packageSettings: Any) =
+        callMethod(packageSettings, "getPackageName") as String?
 
     fun getPackageManager() = ActivityThread.currentActivityThread().application.packageManager!!
 
