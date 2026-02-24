@@ -53,7 +53,7 @@ class PmsHookTarget31(service: HMAService) : PmsHookTargetBase(service) {
                 PMS_COMPUTER_TRACKER_CLASS,
                 "getPackageSetting",
             ) { param ->
-                val targetApp = param.args?.get(1) as String
+                val targetApp = param.getArgument(1) as String
                 val callingUid = Binder.getCallingUid()
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
                 if (service.shouldHideFromUid(callingUid, targetApp) == true) {
@@ -76,8 +76,8 @@ class PmsHookTarget31(service: HMAService) : PmsHookTargetBase(service) {
                 PMS_COMPUTER_TRACKER_CLASS,
                 "getPackageSettingInternal",
             ) { param ->
-                val targetApp = param.args!![1] as String
-                val callingUid = param.args[2] as Int
+                val targetApp = param.getArgument(1) as String
+                val callingUid = param.getArgument(2) as Int
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
                 if (service.shouldHideFromUid(callingUid, targetApp) == true) {
                     param.result = null
@@ -99,8 +99,8 @@ class PmsHookTarget31(service: HMAService) : PmsHookTargetBase(service) {
                 PMS_COMPUTER_TRACKER_CLASS,
                 "getPackageInfoInternal",
             ) { param ->
-                val targetApp = param.args?.get(1) as String? ?: return@hookBefore
-                val callingUid = param.args[4] as Int
+                val targetApp = param.getArgument(1) as String? ?: return@hookBefore
+                val callingUid = param.getArgument(4) as Int
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
                 logV(TAG, "@${param.methodName} incoming query: $callingUid => $targetApp")
                 if (service.shouldHideFromUid(callingUid, targetApp) == true) {
@@ -123,8 +123,8 @@ class PmsHookTarget31(service: HMAService) : PmsHookTargetBase(service) {
                 PMS_COMPUTER_TRACKER_CLASS,
                 "getApplicationInfoInternal",
             ) { param ->
-                val targetApp = param.args?.get(1) as String? ?: return@hookBefore
-                val callingUid = param.args[3] as Int
+                val targetApp = param.getArgument(1) as String? ?: return@hookBefore
+                val callingUid = param.getArgument(3) as Int
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
                 logV(TAG, "@${param.methodName} incoming query: $callingUid => $targetApp")
                 if (service.shouldHideFromUid(callingUid, targetApp) == true) {
@@ -149,9 +149,9 @@ class PmsHookTarget31(service: HMAService) : PmsHookTargetBase(service) {
             ) { param ->
                 logV(TAG, "@shouldFilterApplication call: ${param.args.contentToString()}")
 
-                val callingUid = param.args!![1] as Int
+                val callingUid = param.getArgument(1) as Int
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
-                val targetApp = Utils4Zygote.getPackageNameFromPackageSettings(param.args[3]!!)
+                val targetApp = Utils4Zygote.getPackageNameFromPackageSettings(param.getArgument(3))
                 if (service.shouldHideFromUid(callingUid, targetApp) == true) {
                     param.result = true
                     service.increasePMFilterCount(callingUid)

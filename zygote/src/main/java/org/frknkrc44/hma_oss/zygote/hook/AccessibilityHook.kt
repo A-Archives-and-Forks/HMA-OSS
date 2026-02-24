@@ -20,19 +20,16 @@ class AccessibilityHook(private val service: HMAService) : IFrameworkHook {
             hookBefore(
                 ACCESSIBILITY_SERVICE_CLASS,
                 "getInstalledAccessibilityServiceList",
-                dumpArgs = false,
             ) { param -> hookedMethod(param) }
 
             hookBefore(
                 ACCESSIBILITY_SERVICE_CLASS,
                 "getEnabledAccessibilityServiceList",
-                dumpArgs = false,
             ) { param -> hookedMethod(param) }
 
             hookBefore(
                 ACCESSIBILITY_SERVICE_CLASS,
                 "addClient",
-                dumpArgs = false,
             ) { param ->
                 val callingApps = Utils4Zygote.getCallingApps(service)
                 if (callingApps.isEmpty()) return@hookBefore

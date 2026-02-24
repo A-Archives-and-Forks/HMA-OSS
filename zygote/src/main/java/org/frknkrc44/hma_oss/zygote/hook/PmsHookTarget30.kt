@@ -53,7 +53,7 @@ class PmsHookTarget30(service: HMAService) : PmsHookTargetBase(service) {
                 PACKAGE_MANAGER_SERVICE_CLASS,
                 "getPackageSetting",
             ) { param ->
-                val targetApp = param.args!![1] as String
+                val targetApp = param.getArgument(1) as String
                 val callingUid = Binder.getCallingUid()
                 if (service.shouldHideFromUid(callingUid, targetApp) == true) {
                     param.result = null
@@ -75,9 +75,9 @@ class PmsHookTarget30(service: HMAService) : PmsHookTargetBase(service) {
                 APPS_FILTER_CLASS,
                 "shouldFilterApplication",
             ) { param ->
-                val callingUid = param.args!![1] as Int
+                val callingUid = param.getArgument(1) as Int
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
-                val targetApp = Utils4Zygote.getPackageNameFromPackageSettings(param.args[3]!!)
+                val targetApp = Utils4Zygote.getPackageNameFromPackageSettings(param.getArgument(3))
                 if (service.shouldHideFromUid(callingUid, targetApp) == true) {
                     param.result = true
                     service.increasePMFilterCount(callingUid)
@@ -102,8 +102,8 @@ class PmsHookTarget30(service: HMAService) : PmsHookTargetBase(service) {
                 PACKAGE_MANAGER_SERVICE_CLASS,
                 "getPackageInfoInternal",
             ) { param ->
-                val targetApp = param.args?.get(1) as String? ?: return@hookBefore
-                val callingUid = param.args[4] as Int
+                val targetApp = param.getArgument(1) as String? ?: return@hookBefore
+                val callingUid = param.getArgument(4) as Int
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
                 logV(TAG, "@${param.methodName} incoming query: $callingUid => $targetApp")
                 if (service.shouldHideFromUid(callingUid, targetApp) == true) {
@@ -126,8 +126,8 @@ class PmsHookTarget30(service: HMAService) : PmsHookTargetBase(service) {
                 PACKAGE_MANAGER_SERVICE_CLASS,
                 "getApplicationInfoInternal",
             ) { param ->
-                val targetApp = param.args?.get(1) as String? ?: return@hookBefore
-                val callingUid = param.args[3] as Int
+                val targetApp = param.getArgument(1) as String? ?: return@hookBefore
+                val callingUid = param.getArgument(3) as Int
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
                 logV(TAG, "@${param.methodName} incoming query: $callingUid => $targetApp")
                 if (service.shouldHideFromUid(callingUid, targetApp) == true) {

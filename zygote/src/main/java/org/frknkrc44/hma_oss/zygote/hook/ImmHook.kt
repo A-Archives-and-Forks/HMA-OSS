@@ -64,8 +64,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
                 hookBefore(
                     IMM_SERVICE_CLASS,
                     "getCurrentInputMethodInfoAsUser",
-                    dumpArgs = false,
-                ) { param ->
+                                    ) { param ->
                     val callingApps = Utils4Zygote.getCallingApps(service)
 
                     val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
@@ -84,7 +83,6 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
                     "getInputMethodListInternal"
                 else
                     "getInputMethodList",
-                dumpArgs = Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA,
             ) { param ->
                 listHook(param)
             }
@@ -95,7 +93,6 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
                     "getEnabledInputMethodListInternal"
                 else
                     "getEnabledInputMethodList",
-                dumpArgs = Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA,
             ) { param ->
                 listHook(param)
             }
@@ -103,16 +100,14 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
             hookBefore(
                 IMM_SERVICE_CLASS,
                 "getCurrentInputMethodSubtype",
-                dumpArgs = false,
-            ) { param ->
+                            ) { param ->
                 subtypeHook(param)
             }
 
             hookBefore(
                 IMM_SERVICE_CLASS,
                 "getLastInputMethodSubtype",
-                dumpArgs = false,
-            ) { param ->
+                            ) { param ->
                 subtypeHook(param)
             }
 
@@ -122,8 +117,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
                     "getEnabledInputMethodSubtypeListInternal"
                 else
                     "getEnabledInputMethodSubtypeList",
-                dumpArgs = false,
-            ) { param ->
+                            ) { param ->
                 subtypeListHook(param)
             }
         }
@@ -131,7 +125,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
 
     private fun listHook(param: BulkHooker.HookParam) {
         val callingApps = if (param.methodName.endsWith("Internal")) {
-            val callingUid = param.args?.findLast { it is Int } as Int
+            val callingUid = param.args.findLast { it is Int } as Int
             Utils4Zygote.getCallingApps(service, callingUid)
         } else {
             Utils4Zygote.getCallingApps(service)

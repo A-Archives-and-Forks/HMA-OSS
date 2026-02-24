@@ -85,7 +85,7 @@ class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
                 "needsStorageDataIsolation",
             ) { param ->
                 if (service.config.altVoldAppDataIsolation) {
-                    val app = param.args!!.find { it?.javaClass?.simpleName == "ProcessRecord" }!!
+                    val app = param.args.find { it?.javaClass?.simpleName == "ProcessRecord" }!!
                     val uid = getIntField(app, "uid")
                     val processName = runCatching {
                         getObjectField(app, "processName")
@@ -170,8 +170,8 @@ class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
             ) { param ->
                 if (!voldHookSkipped && service.config.altVoldAppDataIsolation && service.config.skipSystemAppDataIsolation) {
                     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
-                    val pidPkgMap = param.args!![1] as java.util.Map<*, *>
-                    val userId = param.args[2] as Int
+                    val pidPkgMap = param.getArgument(1) as java.util.Map<*, *>
+                    val userId = param.getArgument(2) as Int
 
                     val keysToRemove = mutableSetOf<Any>()
 

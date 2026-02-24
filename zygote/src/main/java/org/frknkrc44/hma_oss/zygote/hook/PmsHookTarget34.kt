@@ -69,16 +69,16 @@ class PmsHookTarget34(service: HMAService) : PmsHookTargetBase(service) {
                 APPS_FILTER_IMPL_CLASS,
                 "shouldFilterApplication",
             ) { param ->
-                val callingUid = param.args!![2] as Int
+                val callingUid = param.getArgument(2) as Int
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
-                val targetApp = Utils4Zygote.getPackageNameFromPackageSettings(param.args[4]!!) // PackageSettings <- PackageStateInternal
+                val targetApp = Utils4Zygote.getPackageNameFromPackageSettings(param.getArgument(4)) // PackageSettings <- PackageStateInternal
                 if (service.shouldHideFromUid(callingUid, targetApp) == true) {
                     param.result = true
                     service.increasePMFilterCount(callingUid)
                     logD(TAG, "@shouldFilterApplication caller cache: $callingUid, target: $targetApp")
                     return@hookBefore
                 }
-                val snapshot = param.args[1]
+                val snapshot = param.getArgument(1)
                 val callingApps = Utils.binderLocalScope {
                     getPackagesForUidMethod.invoke(snapshot, callingUid) as Array<String>?
                 } ?: return@hookBefore
@@ -101,7 +101,7 @@ class PmsHookTarget34(service: HMAService) : PmsHookTargetBase(service) {
             ) { param ->
                 val callingUid = Binder.getCallingUid()
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
-                val targetApp = param.args!![1].toString()
+                val targetApp = param.getArgument(1).toString()
                 if (service.shouldHideFromUid(callingUid, targetApp) == true) {
                     param.result = true
                     service.increasePMFilterCount(callingUid)

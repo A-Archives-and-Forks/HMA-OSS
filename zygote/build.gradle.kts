@@ -13,6 +13,7 @@ android {
 
     defaultConfig {
         applicationId = namespace
+        multiDexEnabled = false
     }
 }
 

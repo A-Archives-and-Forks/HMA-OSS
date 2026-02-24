@@ -19,7 +19,7 @@ class ZygoteHook(private val service: HMAService) : IFrameworkHook {
             logD(TAG, "@startZygoteProcess: Starting ${param.args.contentToString()}")
 
             // ignore if the GIDs array is null
-            val gIDsIndex = param.args!!.indexOfFirst { it is IntArray }
+            val gIDsIndex = param.args.indexOfFirst { it is IntArray }
             if (gIDsIndex < 0) return@hookBefore
 
             val caller = param.args.lastOrNull { it is String } as String? ?: return@hookBefore
@@ -31,7 +31,7 @@ class ZygoteHook(private val service: HMAService) : IFrameworkHook {
                 perms = perms.filter { Constants.GID_PAIRS.containsValue(it) }
 
                 logD(TAG, "@startZygoteProcess: GIDs are ${gIDs.contentToString()}, removing $perms now")
-                param.args[gIDsIndex] = gIDs.filter { it !in perms }.toIntArray()
+                param.setArgument(gIDsIndex, gIDs.filter { it !in perms }.toIntArray())
                 service.increaseOthersFilterCount(caller)
             }
         }

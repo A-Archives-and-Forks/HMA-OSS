@@ -31,7 +31,7 @@ class ContentProviderHook(private val service: HMAService): IFrameworkHook {
                 val caller = callingApps.firstOrNull { service.isHookEnabled(it) }
                 if (caller == null) return@hookAfter
 
-                val uriIdx = param.args?.indexOfFirst { it is Uri } ?: return@hookAfter
+                val uriIdx = param.args.indexOfFirst { it is Uri }
                 val uri = param.args[uriIdx] as Uri
                 val projection = param.args[uriIdx + 1] as Array<String>?
                 val args = param.args[uriIdx + 2] as Bundle?
@@ -129,7 +129,7 @@ class ContentProviderHook(private val service: HMAService): IFrameworkHook {
                 val caller = callingApps.firstOrNull { service.isHookEnabled(it) }
                 if (caller == null) return@hookBefore
 
-                val nameIdx = param.args?.indexOfLast { it is String } ?: return@hookBefore
+                val nameIdx = param.args.indexOfLast { it is String }
                 val name = param.args[nameIdx] as String?
                 val method = param.args[nameIdx - 1] as String?
 
@@ -156,10 +156,10 @@ class ContentProviderHook(private val service: HMAService): IFrameworkHook {
 
     private fun getCallingPackages(param: BulkHooker.HookParam) = try {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val attrSource = param.args!!.first { it is AttributionSource } as AttributionSource
+            val attrSource = param.args.first { it is AttributionSource } as AttributionSource
             arrayOf(attrSource.packageName)
         } else {
-            arrayOf(param.args!!.first { it is String } as String)
+            arrayOf(param.args.first { it is String } as String)
         }
     } catch (_: Throwable) {
         Utils4Zygote.getCallingApps(service)

@@ -21,9 +21,9 @@ class PmsPackageEventsHook(private val service: HMAService) : IFrameworkHook {
                     "sendPackageBroadcastAndNotify",
                 ) { param ->
                     service.handlePackageEvent(
-                        param.args!![1] as String?,
-                        param.args[2] as String?,
-                        param.args[3] as Bundle?,
+                        param.getArgument(1) as String?,
+                        param.getArgument(2) as String?,
+                        param.getArgument(3) as Bundle?,
                     )
                 }
 
@@ -31,7 +31,7 @@ class PmsPackageEventsHook(private val service: HMAService) : IFrameworkHook {
                     "com.android.internal.content.PackageMonitor",
                     "onReceive",
                 ) { param ->
-                    val intent = param.args?.get(2) as Intent? ?: return@hookBefore
+                    val intent = param.getArgument(2) as Intent? ?: return@hookBefore
 
                     service.handlePackageEvent(
                         intent.action,
@@ -45,9 +45,9 @@ class PmsPackageEventsHook(private val service: HMAService) : IFrameworkHook {
                     "sendPackageBroadcast",
                 ) { param ->
                     service.handlePackageEvent(
-                        param.args!![1] as String?,
-                        param.args[2] as String?,
-                        param.args[3] as Bundle?,
+                        param.getArgument(1) as String?,
+                        param.getArgument(2) as String?,
+                        param.getArgument(3) as Bundle?,
                     )
                 }
             }

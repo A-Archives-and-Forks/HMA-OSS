@@ -28,9 +28,9 @@ class PmsHookTarget29(service: HMAService) : PmsHookTargetBase(service) {
                 "filterAppAccessLPr",
                 paramCount = 5,
             ) { param ->
-                val callingUid = param.args!![2] as Int
+                val callingUid = param.getArgument(2) as Int
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
-                val packageSettings = param.args[1] ?: return@hookBefore
+                val packageSettings = param.getArgument(1)
                 val targetApp = Utils4Zygote.getPackageNameFromPackageSettings(packageSettings)
                 if (service.shouldHideFromUid(callingUid, targetApp) == true) {
                     param.result = true
@@ -56,8 +56,8 @@ class PmsHookTarget29(service: HMAService) : PmsHookTargetBase(service) {
                 PACKAGE_MANAGER_SERVICE_CLASS,
                 "getPackageInfoInternal",
             ) { param ->
-                val targetApp = param.args!![1] as String? ?: return@hookBefore
-                val callingUid = param.args[4] as Int
+                val targetApp = param.getArgument(1) as String? ?: return@hookBefore
+                val callingUid = param.getArgument(4) as Int
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
                 logV(TAG, "@${param.methodName} incoming query: $callingUid => $targetApp")
                 if (service.shouldHideFromUid(callingUid, targetApp) == true) {
@@ -80,8 +80,8 @@ class PmsHookTarget29(service: HMAService) : PmsHookTargetBase(service) {
                 PACKAGE_MANAGER_SERVICE_CLASS,
                 "getApplicationInfoInternal",
             ) { param ->
-                val targetApp = param.args!![1] as String? ?: return@hookBefore
-                val callingUid = param.args[3] as Int
+                val targetApp = param.getArgument(1) as String? ?: return@hookBefore
+                val callingUid = param.getArgument(3) as Int
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
                 logV(TAG, "@${param.methodName} incoming query: $callingUid => $targetApp")
                 if (service.shouldHideFromUid(callingUid, targetApp) == true) {

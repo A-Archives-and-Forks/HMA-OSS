@@ -21,26 +21,45 @@ import java.util.regex.Pattern
 object Utils4Zygote {
     fun dumpArgs(frame: EmulatedStackFrame): Array<Any?> {
         return mutableListOf<Any?>().let {
-            for (i in 0 ..< frame.type().parameterCount()) {
-                val accessor = frame.accessor()
-
-                it.add(
-                    when (accessor.getArgumentShorty(i)) {
-                        'L' -> accessor.getReference(i)
-                        'Z' -> accessor.getBoolean(i)
-                        'B' -> accessor.getByte(i)
-                        'C' -> accessor.getChar(i)
-                        'S' -> accessor.getShort(i)
-                        'I' -> accessor.getInt(i)
-                        'J' -> accessor.getLong(i)
-                        'F' -> accessor.getFloat(i)
-                        'D' -> accessor.getDouble(i)
-                        else -> throw Exception("Should not reach here")
-                    }
-                )
+            for (index in 0 ..< frame.type().parameterCount()) {
+                it.add(getArgument(frame, index))
             }
 
             it.toTypedArray()
+        }
+    }
+
+    fun getArgument(frame: EmulatedStackFrame, index: Int): Any {
+        val accessor = frame.accessor()
+
+        return when (accessor.getArgumentShorty(index)) {
+            'L' -> accessor.getReference(index)
+            'Z' -> accessor.getBoolean(index)
+            'B' -> accessor.getByte(index)
+            'C' -> accessor.getChar(index)
+            'S' -> accessor.getShort(index)
+            'I' -> accessor.getInt(index)
+            'J' -> accessor.getLong(index)
+            'F' -> accessor.getFloat(index)
+            'D' -> accessor.getDouble(index)
+            else -> throw Exception("Should not reach here")
+        }
+    }
+
+    fun setArgument(frame: EmulatedStackFrame, index: Int, value: Any) {
+        val accessor = frame.accessor()
+
+        when (accessor.getArgumentShorty(index)) {
+            'L' -> accessor.setReference(index, value)
+            'Z' -> accessor.setBoolean(index, value as Boolean)
+            'B' -> accessor.setByte(index, value as Byte)
+            'C' -> accessor.setChar(index, value as Char)
+            'S' -> accessor.setShort(index, value as Short)
+            'I' -> accessor.setInt(index, value as Int)
+            'J' -> accessor.setLong(index, value as Long)
+            'F' -> accessor.setFloat(index, value as Float)
+            'D' -> accessor.setDouble(index, value as Double)
+            else -> throw Exception("Should not reach here")
         }
     }
 

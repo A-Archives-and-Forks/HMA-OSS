@@ -79,7 +79,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                     "addPackageHoldingPermissions",
                 ) { param ->
                     val callingUid = Binder.getCallingUid()
-                    val packageState = param.args!![2] ?: return@hookBefore
+                    val packageState = param.getArgument(2)
                     val targetApp = Utils4Zygote.callMethod(packageState, "getPackageName") as String? ?: return@hookBefore
                     if (service.shouldHideFromUid(callingUid, targetApp) == true) {
                         param.result = null
@@ -101,7 +101,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                     COMPUTER_ENGINE_CLASS,
                     "isCallerInstallerOfRecord",
                 ) { param ->
-                    val pkg = param.args?.get(1) ?: return@hookBefore
+                    val pkg = param.args[1] ?: return@hookBefore
                     val query = Utils4Zygote.callMethod(pkg, "getPackageName") as String
 
                     val callingUid = param.args.last { it is Int } as Int
@@ -126,7 +126,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                     COMPUTER_ENGINE_CLASS,
                     "getPackageInfoInternal",
                 ) { param ->
-                    val targetApp = param.args?.firstOrNull { it is String } as? String ?: return@hookBefore
+                    val targetApp = param.args.firstOrNull { it is String } as? String ?: return@hookBefore
                     val callingUid = param.args.firstOrNull { it is Int } as? Int ?: Binder.getCallingUid()
                     if (callingUid == Constants.UID_SYSTEM) return@hookBefore
                     logV(TAG, "@${param.methodName} incoming query: $callingUid => $targetApp")
@@ -150,7 +150,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                     COMPUTER_ENGINE_CLASS,
                     "getApplicationInfoInternal",
                 ) { param ->
-                    val targetApp = param.args?.firstOrNull { it is String } as? String ?: return@hookBefore
+                    val targetApp = param.args.firstOrNull { it is String } as? String ?: return@hookBefore
                     val callingUid = param.args.firstOrNull { it is Int } as? Int ?: Binder.getCallingUid()
                     if (callingUid == Constants.UID_SYSTEM) return@hookBefore
                     logV(TAG, "@${param.methodName} incoming query: $callingUid => $targetApp")
@@ -176,7 +176,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                     service::pmn::class.java.name,
                     "getInstallerForPackage",
                 ) { param ->
-                    val query = param.args?.get(1) as? String ?: return@hookBefore
+                    val query = param.getArgument(1) as? String ?: return@hookBefore
 
                     val callingUid = Binder.getCallingUid()
                     if (callingUid == Constants.UID_SYSTEM) return@hookBefore
@@ -202,7 +202,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                     service::pms::class.java.name,
                     "getInstallSourceInfo",
                 ) { param ->
-                    val query = param.args?.get(1) as? String ?: return@hookBefore
+                    val query = param.getArgument(1) as? String ?: return@hookBefore
 
                     val callingUid = Binder.getCallingUid()
                     if (callingUid == Constants.UID_SYSTEM) return@hookBefore
@@ -227,7 +227,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                 service::pms::class.java.name,
                 "getInstallerPackageName",
             ) { param ->
-                val query = param.args?.get(1) as? String ?: return@hookBefore
+                val query = param.getArgument(1) as? String ?: return@hookBefore
 
                 val callingUid = Binder.getCallingUid()
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore

@@ -98,7 +98,7 @@ class ActivityHook(private val service: HMAService) : IFrameworkHook {
                     "applyPostResolutionFilter",
                 ) { param ->
                     @Suppress("UNCHECKED_CAST") // I know what I do
-                    val list = param.args?.get(1) as List<ResolveInfo>?
+                    val list = param.args[1] as List<ResolveInfo>?
                     if (list.isNullOrEmpty()) return@hookBefore
 
                     val callingUid = param.args.first { it is Int } as Int
@@ -122,7 +122,7 @@ class ActivityHook(private val service: HMAService) : IFrameworkHook {
                         }
 
                         if (filteredList.size != list.size) {
-                            param.args[1] = filteredList.toList()
+                            param.setArgument(1, filteredList.toList())
 
                             service.increasePMFilterCount(caller)
                         }

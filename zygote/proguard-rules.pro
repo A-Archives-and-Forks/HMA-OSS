@@ -20,9 +20,10 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--keep class org.frknkrc44.hma_oss.zygote.ZygoteEntry { main(); }
+-keep class org.frknkrc44.hma_oss.zygote.ZygoteEntry { premain(); main(); }
+-keep class org.frknkrc44.hma_oss.zygote.**
+-keep class org.frknkrc44.hma_oss.zygote.hook.**
 -dontwarn android.content.pm.IPackageManager
 -dontwarn android.content.pm.ParceledListSlice
 -dontwarn android.os.SystemProperties
 -dontwarn com.v7878.r8.annotations.KeepCodeAttribute
--keep class org.frknkrc44.hma_oss.zygote.**

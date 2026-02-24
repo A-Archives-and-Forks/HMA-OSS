@@ -35,10 +35,10 @@ class PlatformCompatHook(private val service: HMAService) : IFrameworkHook {
             runCatching {
                 if (!sAppDataIsolationEnabled) return@hookBefore
 
-                val changeId = param.args!![1] as Long
+                val changeId = param.getArgument(1) as Long
                 if (changeId != 143937733L) return@hookBefore
 
-                val appInfo = param.args[2] as ApplicationInfo
+                val appInfo = param.getArgument(2) as ApplicationInfo
                 val app = appInfo.packageName
                 if (app == BuildConfig.APP_PACKAGE_NAME || app in service.systemApps) return@hookBefore
                 if (service.isHookEnabled(app)) {

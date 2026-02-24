@@ -14,7 +14,6 @@ import java.lang.reflect.Executable
 import java.util.regex.Pattern
 import java.util.stream.Stream
 
-
 class BulkHooker private constructor() {
     companion object {
         val instance: BulkHooker by lazy { BulkHooker() }
@@ -22,10 +21,6 @@ class BulkHooker private constructor() {
 
     private val hooks: MutableMap<String, MutableList<HookElement>> =
         HashMap<String, MutableList<HookElement>>()
-
-    fun findHookElement(clazz: String, methodName: String) = hooks[clazz]?.first {
-        it.pattern == String.format("%s\\(.*\\).*", Pattern.quote(methodName))
-    }
 
     private fun addPattern(clazz: String, pattern: String, hookFirst: Boolean, paramCount: Int, impl: HookTransformer) {
         hooks.computeIfAbsent(clazz) { _ -> mutableListOf() }
@@ -50,28 +45,22 @@ class BulkHooker private constructor() {
     internal fun hookBefore(
         clazz: String,
         methodName: String,
-        dumpArgs: Boolean = true,
         autoApply: Boolean = true,
         hookFirst: Boolean = true,
         paramCount: Int = -1,
         hook: (param: HookParam) -> Unit,
     ) {
         addAll(clazz, methodName, hookFirst, paramCount) { original, frame ->
-            val args = if (dumpArgs) Utils4Zygote.dumpArgs(frame) else null
             val value = ReturnValue()
 
             runCatching {
-                hook(HookParam(clazz, original, frame, methodName, args, value))
+                hook(HookParam(clazz, original, frame, methodName, value))
             }.onFailure {
                 logE(TAG, it.message ?: "Unknown error on hook", it)
             }
 
             if (!value.replace) {
-                if (!dumpArgs) {
-                    Transformers.invokeExact(original, frame)
-                } else {
-                    value.value = original.invokeWithArguments(*args!!)
-                }
+                Transformers.invokeExact(original, frame)
             }
 
             if (value.replace && frame.type().returnType() != Void::class.java) {
@@ -87,7 +76,6 @@ class BulkHooker private constructor() {
     internal fun hookAfter(
         clazz: String,
         methodName: String,
-        dumpArgs: Boolean = true,
         autoApply: Boolean = true,
         hookFirst: Boolean = true,
         paramCount: Int = -1,
@@ -102,14 +90,13 @@ class BulkHooker private constructor() {
                 throwable = it
             }
 
-            val args = if (dumpArgs) Utils4Zygote.dumpArgs(frame) else null
             val value = ReturnValue(if (throwable == null) {
                 frame.accessor().getValue(RETURN_VALUE_IDX)
             } else null)
             value.throwable = throwable
 
             runCatching {
-                hook(HookParam(clazz, original, frame, methodName, args, value))
+                hook(HookParam(clazz, original, frame, methodName, value))
             }.onFailure {
                 logE(TAG, it.message ?: "Unknown error on hook", it)
             }
@@ -211,14 +198,6 @@ class BulkHooker private constructor() {
         val original: MethodHandle,
         val frame: EmulatedStackFrame,
         val methodName: String,
-
-        /**
-         * - `args[0] == thisObject`
-         * - `args[1:] == function args`
-         *
-         * Note that this variable is null when `dumpArgs == false`
-         */
-        val args: Array<Any?>?,
         val returnValue: ReturnValue,
     ) {
         var result: Any?
@@ -226,40 +205,24 @@ class BulkHooker private constructor() {
             set(newValue) { returnValue.value = newValue }
 
         /**
-         * Returns the first argument, can throw an exception when `dumpArgs == false`
+         * Returns the first argument
          */
-        val thisObject get() = args?.first()!!
+        val thisObject by lazy { Utils4Zygote.getArgument(frame, 0) }
+
+        fun getArgument(index: Int) = Utils4Zygote.getArgument(frame, index)
+
+        fun setArgument(index: Int, value: Any) = Utils4Zygote.setArgument(frame, index, value)
+
+        /**
+         * - `args[0] == thisObject`
+         * - `args[1:] == function args`
+         *
+         * Note that this variable is null when `dumpArgs == false`
+         */
+        val args by lazy { Utils4Zygote.dumpArgs(frame) }
 
         var throwable: Throwable?
             get() = returnValue.throwable
             set(newValue) { returnValue.throwable = newValue }
-
-        // -- BEGIN OF GENERATED FUNCTIONS --
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as HookParam
-
-            if (clazz != other.clazz) return false
-            if (original != other.original) return false
-            if (frame != other.frame) return false
-            if (methodName != other.methodName) return false
-            if (!args.contentEquals(other.args)) return false
-            if (returnValue != other.returnValue) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            var result1 = clazz.hashCode()
-            result1 = 31 * result1 + original.hashCode()
-            result1 = 31 * result1 + frame.hashCode()
-            result1 = 31 * result1 + methodName.hashCode()
-            result1 = 31 * result1 + (args?.contentHashCode() ?: 0)
-            result1 = 31 * result1 + returnValue.hashCode()
-            return result1
-        }
-        // -- END OF GENERATED FUNCTIONS --
     }
 }
