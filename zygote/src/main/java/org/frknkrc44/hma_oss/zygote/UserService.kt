@@ -55,25 +55,29 @@ object UserService {
 
     fun register(pms: IPackageManager, pmn: Any?) {
         logI(TAG, "Initialize HMAService - Version ${BuildConfig.APP_VERSION_NAME}")
-        val service = HMAService(pms, pmn)
+
+        var appUid = -1
 
         try {
             val pkgInfo = getPackageInfoCompat(pms, BuildConfig.APP_PACKAGE_NAME, 0L, 0)
             if (pkgInfo != null) {
                 if (verifyAppSignature(pkgInfo.applicationInfo?.sourceDir)) {
                     logI(TAG, "The manager app signature is verified successfully")
-                    service.appUid = pkgInfo.applicationInfo!!.uid
+                    appUid = pkgInfo.applicationInfo!!.uid
                 } else {
                     throw AssertionError("The manager app is modified, skipping")
                 }
             }
-            assert(service.appUid >= 0) {
+            assert(appUid >= 0) {
                 "App UID cannot be -1 or lower"
             }
-            logD(TAG, "Client uid: ${service.appUid}")
+            logD(TAG, "Client uid: $appUid")
         } catch (e: Throwable) {
             logE(TAG, "Fatal: Cannot get package details\nCompile this app from source with your changes", e)
         }
+
+        val service = HMAService(pms, pmn)
+        service.appUid = appUid
 
         Utils4Zygote.waitForService("activity")
         ActivityManagerApis.registerUidObserver(

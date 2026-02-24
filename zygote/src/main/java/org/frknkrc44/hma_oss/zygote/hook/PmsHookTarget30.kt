@@ -53,8 +53,9 @@ class PmsHookTarget30(service: HMAService) : PmsHookTargetBase(service) {
                 PACKAGE_MANAGER_SERVICE_CLASS,
                 "getPackageSetting",
             ) { param ->
-                val targetApp = param.getArgument(1) as String
                 val callingUid = Binder.getCallingUid()
+                if (callingUid == Constants.UID_SYSTEM) return@hookBefore
+                val targetApp = param.getArgument(1) as String
                 if (service.shouldHideFromUid(callingUid, targetApp) == true) {
                     param.result = null
                     service.increasePMFilterCount(callingUid)
@@ -102,9 +103,9 @@ class PmsHookTarget30(service: HMAService) : PmsHookTargetBase(service) {
                 PACKAGE_MANAGER_SERVICE_CLASS,
                 "getPackageInfoInternal",
             ) { param ->
-                val targetApp = param.getArgument(1) as String? ?: return@hookBefore
                 val callingUid = param.getArgument(4) as Int
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
+                val targetApp = param.getArgument(1) as String? ?: return@hookBefore
                 logV(TAG, "@${param.methodName} incoming query: $callingUid => $targetApp")
                 if (service.shouldHideFromUid(callingUid, targetApp) == true) {
                     param.result = null
@@ -126,9 +127,9 @@ class PmsHookTarget30(service: HMAService) : PmsHookTargetBase(service) {
                 PACKAGE_MANAGER_SERVICE_CLASS,
                 "getApplicationInfoInternal",
             ) { param ->
-                val targetApp = param.getArgument(1) as String? ?: return@hookBefore
                 val callingUid = param.getArgument(3) as Int
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
+                val targetApp = param.getArgument(1) as String? ?: return@hookBefore
                 logV(TAG, "@${param.methodName} incoming query: $callingUid => $targetApp")
                 if (service.shouldHideFromUid(callingUid, targetApp) == true) {
                     param.result = null
