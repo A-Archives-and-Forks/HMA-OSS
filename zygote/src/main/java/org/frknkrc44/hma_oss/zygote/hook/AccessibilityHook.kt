@@ -21,13 +21,13 @@ class AccessibilityHook(private val service: HMAService) : IFrameworkHook {
                 ACCESSIBILITY_SERVICE_CLASS,
                 "getInstalledAccessibilityServiceList",
                 dumpArgs = false,
-            ) { param -> hookedMethod(param, true) }
+            ) { param -> hookedMethod(param) }
 
             hookBefore(
                 ACCESSIBILITY_SERVICE_CLASS,
                 "getEnabledAccessibilityServiceList",
                 dumpArgs = false,
-            ) { param -> hookedMethod(param, false) }
+            ) { param -> hookedMethod(param) }
 
             hookBefore(
                 ACCESSIBILITY_SERVICE_CLASS,
@@ -49,7 +49,7 @@ class AccessibilityHook(private val service: HMAService) : IFrameworkHook {
     private fun callerIsSpoofed(caller: String) =
         service.getEnabledSettingsPresets(caller).contains(AccessibilityPreset.NAME)
 
-    private fun hookedMethod(param: BulkHooker.HookParam, returnParcel: Boolean) {
+    private fun hookedMethod(param: BulkHooker.HookParam) {
         try {
             val callingApps = Utils4Zygote.getCallingApps(service)
             if (callingApps.isEmpty()) return
@@ -60,6 +60,7 @@ class AccessibilityHook(private val service: HMAService) : IFrameworkHook {
 
                 logD(TAG, "@${param.methodName} returned empty list for ${callingApps.contentToString()}")
 
+                val returnParcel = param.frame.type().returnType().javaClass == ParceledListSlice::class.java
                 param.result = if (returnParcel) {
                     ParceledListSlice(returnedList)
                 } else {
