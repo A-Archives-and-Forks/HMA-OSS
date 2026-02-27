@@ -64,7 +64,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
                 hookBefore(
                     IMM_SERVICE_CLASS,
                     "getCurrentInputMethodInfoAsUser",
-                                    ) { param ->
+                ) { param ->
                     val callingApps = Utils4Zygote.getCallingApps(service)
 
                     val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
@@ -79,7 +79,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
 
             hookBefore(
                 IMM_SERVICE_CLASS,
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM)
                     "getInputMethodListInternal"
                 else
                     "getInputMethodList",
@@ -89,7 +89,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
 
             hookBefore(
                 IMM_SERVICE_CLASS,
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM)
                     "getEnabledInputMethodListInternal"
                 else
                     "getEnabledInputMethodList",
@@ -100,14 +100,14 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
             hookBefore(
                 IMM_SERVICE_CLASS,
                 "getCurrentInputMethodSubtype",
-                            ) { param ->
+            ) { param ->
                 subtypeHook(param)
             }
 
             hookBefore(
                 IMM_SERVICE_CLASS,
                 "getLastInputMethodSubtype",
-                            ) { param ->
+            ) { param ->
                 subtypeHook(param)
             }
 
@@ -117,7 +117,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
                     "getEnabledInputMethodSubtypeListInternal"
                 else
                     "getEnabledInputMethodSubtypeList",
-                            ) { param ->
+            ) { param ->
                 subtypeListHook(param)
             }
         }

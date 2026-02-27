@@ -28,6 +28,6 @@ rootProject.name = "HMA-OSS"
 
 include(
     ":app",
-    ":common"
+    ":common",
+    ":zygote",
 )
-include(":zygote")
