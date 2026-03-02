@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.pm.ResolveInfo
 import android.os.Build
 import icu.nullptr.hidemyapplist.common.Constants
+import icu.nullptr.hidemyapplist.common.OSUtils
 import icu.nullptr.hidemyapplist.common.Utils
 import org.frknkrc44.hma_oss.zygote.BulkHooker
 import org.frknkrc44.hma_oss.zygote.HMAService
@@ -88,7 +89,7 @@ class ActivityHook(private val service: HMAService) : IFrameworkHook {
             }
              */
 
-            if (!Utils.isSamsung()) {
+            if (!OSUtils.isSamsung()) {
                 hookBefore(
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         COMPUTER_ENGINE_CLASS

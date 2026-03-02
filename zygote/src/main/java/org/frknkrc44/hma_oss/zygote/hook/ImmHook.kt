@@ -13,7 +13,6 @@ import org.frknkrc44.hma_oss.zygote.HMAService
 import org.frknkrc44.hma_oss.zygote.Utils4Zygote
 import org.frknkrc44.hma_oss.zygote.ZygoteConstants.IMM_SERVICE_CLASS
 import org.frknkrc44.hma_oss.zygote.logD
-import org.frknkrc44.hma_oss.zygote.logE
 import org.frknkrc44.hma_oss.zygote.logV
 import java.util.Collections
 

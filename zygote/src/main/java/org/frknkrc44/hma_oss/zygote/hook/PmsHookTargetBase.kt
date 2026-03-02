@@ -10,7 +10,9 @@ import icu.nullptr.hidemyapplist.common.Constants.VENDING_PACKAGE_NAME
 import icu.nullptr.hidemyapplist.common.Utils
 import org.frknkrc44.hma_oss.zygote.BulkHooker
 import org.frknkrc44.hma_oss.zygote.HMAService
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote
+import org.frknkrc44.hma_oss.zygote.Utils4Zygote.callMethod
+import org.frknkrc44.hma_oss.zygote.Utils4Zygote.getCallingApps
+import org.frknkrc44.hma_oss.zygote.Utils4Zygote.getPackageNameFromPackageSettings
 import org.frknkrc44.hma_oss.zygote.ZygoteConstants.COMPUTER_ENGINE_CLASS
 import org.frknkrc44.hma_oss.zygote.logD
 import org.frknkrc44.hma_oss.zygote.logV
@@ -48,7 +50,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                     val callingUid = Binder.getCallingUid()
                     if (callingUid == Constants.UID_SYSTEM) return@hookAfter
 
-                    val callingApps = Utils4Zygote.getCallingApps(service, callingUid)
+                    val callingApps = getCallingApps(service, callingUid)
                     val caller = callingApps.firstOrNull { service.isHookEnabled(it) }
                     if (caller != null) {
                         logD(TAG, "@getPackageStates: incoming query from $caller")
@@ -57,8 +59,8 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                         val markedToRemove = mutableListOf<Any>()
 
                         for (pair in result.entries) {
-                            val value = pair.value
-                            val packageName = Utils4Zygote.callMethod(value, "getPackageName") as String
+                            val packageSettings = pair.value
+                            val packageName = getPackageNameFromPackageSettings(packageSettings)
                             if (service.shouldHide(caller, packageName)) {
                                 markedToRemove.add(pair.key)
                             }
@@ -79,15 +81,15 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                     "addPackageHoldingPermissions",
                 ) { param ->
                     val callingUid = Binder.getCallingUid()
-                    val packageState = param.getArgument(2)
-                    val targetApp = Utils4Zygote.callMethod(packageState, "getPackageName") as String? ?: return@hookBefore
+                    val packageSettings = param.getArgument(2)
+                    val targetApp = getPackageNameFromPackageSettings(packageSettings) ?: return@hookBefore
                     if (service.shouldHideFromUid(callingUid, targetApp) == true) {
                         param.result = null
                         service.increasePMFilterCount(callingUid)
                         logD(TAG, "@addPackageHoldingPermissions caller cache: $callingUid, target: $targetApp")
                         return@hookBefore
                     }
-                    val callingApps = Utils4Zygote.getCallingApps(service, callingUid)
+                    val callingApps = getCallingApps(service, callingUid)
                     val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
                     if (caller != null) {
                         logD(TAG, "@addPackageHoldingPermissions caller: $callingUid $caller, target: $targetApp")
@@ -101,13 +103,19 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                     COMPUTER_ENGINE_CLASS,
                     "isCallerInstallerOfRecord",
                 ) { param ->
-                    val pkg = param.args[1] ?: return@hookBefore
-                    val query = Utils4Zygote.callMethod(pkg, "getPackageName") as String
-
                     val callingUid = param.args.last { it is Int } as Int
                     if (callingUid == Constants.UID_SYSTEM) return@hookBefore
 
-                    val callingApps = Utils4Zygote.getCallingApps(service, callingUid)
+                    val pkg = param.args[1] ?: return@hookBefore
+                    val query = callMethod(
+                        pkg,
+                        if (pkg.javaClass.simpleName == "PackageImpl") {
+                        "getManifestPackageName"
+                    } else {
+                        "getPackageName"
+                    }) as? String ?: return@hookBefore
+
+                    val callingApps = getCallingApps(service, callingUid)
                     val callingHandle = UserHandle.getUserHandleForUid(callingUid)
 
                     for (caller in callingApps) {
@@ -136,7 +144,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                         logD(TAG, "@${param.methodName} caller cache: $callingUid, target: $targetApp")
                         return@hookBefore
                     }
-                    val callingApps = Utils4Zygote.getCallingApps(service, callingUid)
+                    val callingApps = getCallingApps(service, callingUid)
                     val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
                     if (caller != null) {
                         logD(TAG, "@${param.methodName} caller: $callingUid $caller, target: $targetApp")
@@ -160,7 +168,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                         logD(TAG, "@${param.methodName} caller cache: $callingUid, target: $targetApp")
                         return@hookBefore
                     }
-                    val callingApps = Utils4Zygote.getCallingApps(service, callingUid)
+                    val callingApps = getCallingApps(service, callingUid)
                     val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
                     if (caller != null) {
                         logD(TAG, "@${param.methodName} caller: $callingUid $caller, target: $targetApp")
@@ -181,7 +189,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                     val callingUid = Binder.getCallingUid()
                     if (callingUid == Constants.UID_SYSTEM) return@hookBefore
 
-                    val callingApps = Utils4Zygote.getCallingApps(service, callingUid)
+                    val callingApps = getCallingApps(service, callingUid)
                     val callingHandle = UserHandle.getUserHandleForUid(callingUid)
 
                     for (caller in callingApps) {
@@ -207,7 +215,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                     val callingUid = Binder.getCallingUid()
                     if (callingUid == Constants.UID_SYSTEM) return@hookBefore
 
-                    val callingApps = Utils4Zygote.getCallingApps(service, callingUid)
+                    val callingApps = getCallingApps(service, callingUid)
                     val callingHandle = UserHandle.getUserHandleForUid(callingUid)
 
                     for (caller in callingApps) {
@@ -232,7 +240,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                 val callingUid = Binder.getCallingUid()
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
 
-                val callingApps = Utils4Zygote.getCallingApps(service, callingUid)
+                val callingApps = getCallingApps(service, callingUid)
                 val callingHandle = UserHandle.getUserHandleForUid(callingUid)
 
                 for (caller in callingApps) {
