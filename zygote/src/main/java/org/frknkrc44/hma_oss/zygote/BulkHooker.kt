@@ -53,18 +53,25 @@ class BulkHooker private constructor() {
         addAll(clazz, methodName, hookFirst, paramCount) { original, frame ->
             val value = ReturnValue()
 
-            runCatching {
+            try {
                 hook(HookParam(clazz, original, frame, methodName, value))
-            }.onFailure {
+            } catch (it: Throwable) {
                 logE(TAG, it.message ?: "Unknown error on hook", it)
             }
 
             if (!value.replace) {
-                Transformers.invokeExactPlain(original, frame)
+                try {
+                    Transformers.invokeExactPlain(original, frame)
+                } catch (it: Throwable) {
+                    logE(TAG, it.message ?: "Unknown error on original function", it)
+                    value.throwable = it
+                }
             }
 
+            value.throwable?.let { throw it }
+
             if (value.replace && frame.type().returnType() != Void::class.java) {
-                frame.accessor().setValue(RETURN_VALUE_IDX, value.value)
+                frame.accessor().setValue(RETURN_VALUE_IDX, value.result)
             }
         }
 
@@ -82,31 +89,28 @@ class BulkHooker private constructor() {
         hook: (param: HookParam) -> Unit,
     ) {
         addAll(clazz, methodName, hookFirst, paramCount) { original, frame ->
-            var throwable: Throwable? = null
+            val value = ReturnValue()
 
-            runCatching {
+            try {
                 Transformers.invokeExactPlain(original, frame)
-            }.onFailure {
-                throwable = it
+            } catch (it: Throwable) {
+                value.throwable = it
             }
 
-            val value = ReturnValue(if (throwable == null) {
-                frame.accessor().getValue(RETURN_VALUE_IDX)
-            } else null)
-            value.throwable = throwable
+            if (value.throwable == null) {
+                value.setResultWithoutReplace(frame.accessor().getValue(RETURN_VALUE_IDX))
+            }
 
-            runCatching {
+            try {
                 hook(HookParam(clazz, original, frame, methodName, value))
-            }.onFailure {
+            } catch (it: Throwable) {
                 logE(TAG, it.message ?: "Unknown error on hook", it)
             }
 
-            if (throwable != null) {
-                throw throwable
-            }
+            value.throwable?.let { throw it }
 
-            if (value.replace && frame.type().returnType() != Void::class.java) {
-                frame.accessor().setValue(RETURN_VALUE_IDX, value.value)
+            if (frame.type().returnType() != Void::class.java) {
+                frame.accessor().setValue(RETURN_VALUE_IDX, value.result)
             }
         }
 
@@ -172,23 +176,20 @@ class BulkHooker private constructor() {
         }
     }
 
-    data class HookElement(
-        val impl: HookTransformer,
-        val pattern: String,
-        val hookFirst: Boolean,
-        val paramCount: Int = -1,
-        var applyCount: Int = 0,
-    )
-
     class ReturnValue(initialValue: Any? = null) {
         var replace: Boolean = false
             private set
 
-        var value: Any? = initialValue
-            set(value) {
-                field = value
+        var result: Any? = initialValue
+            set(newValue) {
+                field = newValue
                 replace = true
             }
+
+        fun setResultWithoutReplace(newValue: Any?) {
+            result = newValue
+            replace = false
+        }
 
         var throwable: Throwable? = null
     }
@@ -201,8 +202,8 @@ class BulkHooker private constructor() {
         val returnValue: ReturnValue,
     ) {
         var result: Any?
-            get() = returnValue.value
-            set(newValue) { returnValue.value = newValue }
+            get() = returnValue.result
+            set(newValue) { returnValue.result = newValue }
 
         /**
          * Returns the first argument
@@ -223,4 +224,12 @@ class BulkHooker private constructor() {
             get() = returnValue.throwable
             set(newValue) { returnValue.throwable = newValue }
     }
+
+    data class HookElement(
+        val impl: HookTransformer,
+        val pattern: String,
+        val hookFirst: Boolean,
+        val paramCount: Int = -1,
+        var applyCount: Int = 0,
+    )
 }
