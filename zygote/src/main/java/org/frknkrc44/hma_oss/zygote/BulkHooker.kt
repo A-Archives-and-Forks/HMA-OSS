@@ -1,6 +1,5 @@
 package org.frknkrc44.hma_oss.zygote
 
-import android.util.Log
 import com.v7878.unsafe.Reflection
 import com.v7878.unsafe.invoke.EmulatedStackFrame
 import com.v7878.unsafe.invoke.EmulatedStackFrame.RETURN_VALUE_IDX
@@ -10,9 +9,6 @@ import com.v7878.vmtools.Hooks
 import org.frknkrc44.hma_oss.common.BuildConfig
 import org.frknkrc44.hma_oss.zygote.ZygoteEntry.TAG
 import java.lang.invoke.MethodHandle
-import java.lang.reflect.Executable
-import java.util.regex.Pattern
-import java.util.stream.Stream
 
 class BulkHooker private constructor() {
     companion object {
@@ -22,30 +18,24 @@ class BulkHooker private constructor() {
     private val hooks: MutableMap<String, MutableList<HookElement>> =
         HashMap<String, MutableList<HookElement>>()
 
-    private fun addPattern(clazz: String, pattern: String, hookOnce: Boolean, paramCount: Int, impl: HookTransformer) {
-        hooks.computeIfAbsent(clazz) { _ -> mutableListOf() }
-            .add(HookElement(
-                impl = impl,
-                pattern = pattern,
-                hookOnce = hookOnce,
-                paramCount = paramCount,
-            ))
-    }
-
     private fun addAll(clazz: String, methodName: String, hookOnce: Boolean, paramCount: Int, impl: HookTransformer) {
-        addPattern(
-            clazz,
-            String.format("%s\\(.*\\).*", Pattern.quote(methodName)),
-            hookOnce,
-            paramCount,
-            impl,
+        val element = HookElement(
+            impl = impl,
+            methodName = methodName,
+            hookOnce = hookOnce,
+            paramCount = paramCount,
         )
+
+        if (applyHook(clazz, element)) {
+            hooks.computeIfAbsent(clazz) { _ -> mutableListOf() }.add(element)
+        } else {
+            logI(TAG, "Invalid hook removed: $clazz -> $methodName($paramCount)")
+        }
     }
 
     internal fun hookBefore(
         clazz: String,
         methodName: String,
-        autoApply: Boolean = true,
         hookOnce: Boolean = true,
         paramCount: Int = -1,
         hook: (param: HookParam) -> Unit,
@@ -70,20 +60,15 @@ class BulkHooker private constructor() {
 
             value.throwable?.let { throw it }
 
-            if (value.replace && frame.type().returnType() != Void::class.java) {
-                frame.accessor().setValue(RETURN_VALUE_IDX, value.result)
+            if (value.replace) {
+                Utils4Zygote.setReturnValue(frame, value.result)
             }
-        }
-
-        if (autoApply) {
-            applyHooks()
         }
     }
 
     internal fun hookAfter(
         clazz: String,
         methodName: String,
-        autoApply: Boolean = true,
         hookOnce: Boolean = true,
         paramCount: Int = -1,
         hook: (param: HookParam) -> Unit,
@@ -109,80 +94,66 @@ class BulkHooker private constructor() {
 
             value.throwable?.let { throw it }
 
-            if (frame.type().returnType() != Void::class.java) {
-                frame.accessor().setValue(RETURN_VALUE_IDX, value.result)
-            }
-        }
-
-        if (autoApply) {
-            applyHooks()
+            Utils4Zygote.setReturnValue(frame, value.result)
         }
     }
 
-    internal fun applyHooks(loader: ClassLoader? = SystemServerHook.classLoader) {
-        for (entry in hooks.entries) {
-            var curClazz: Class<*>?
-            try {
-                curClazz = Class.forName(entry.key, true, loader)
-            } catch (ex: ClassNotFoundException) {
-                Log.e(TAG, java.lang.String.format("Class %s not found", entry.key), ex)
-                continue
+    internal fun applyHook(
+        clazz: String,
+        element: HookElement,
+        loader: ClassLoader? = SystemServerHook.classLoader,
+    ): Boolean {
+        var curClazz: Class<*>?
+        try {
+            curClazz = Class.forName(clazz, true, loader)
+        } catch (ex: ClassNotFoundException) {
+            logE(TAG, "Class $clazz not found", ex)
+            return false
+        }
+
+        fun applyForClass(clazz: Class<*>?) {
+            val executables = Reflection.getHiddenExecutables(clazz).filter { executable ->
+                element.methodName == executable.name &&
+                    (element.paramCount in listOf(-1, executable.parameterCount - 1))
+            }.sortedWith { v1, v2 ->
+                v1.parameterCount.compareTo(v2.parameterCount)
             }
 
-            fun apply(clazz: Class<*>?) {
-                val executables = Reflection.getHiddenExecutables(clazz).sortedWith { v1, v2 ->
-                    v1.parameterCount.compareTo(v2.parameterCount)
-                }.toTypedArray()
-                for (element in entry.value) {
-                    Stream.of<Executable>(*executables)
-                        .filter(Utils4Zygote.filter(element.pattern))
-                        .forEach { executable: Executable ->
-                            if (!element.hookFinished) {
-                                if (element.paramCount != -1 && executable.parameterCount != element.paramCount) {
-                                    return@forEach
-                                }
+            for (executable in executables) {
+                if (!element.hookFinished) {
+                    if (BuildConfig.DEBUG) {
+                        logI(TAG, "Hooked: $executable")
+                    }
 
-                                if (BuildConfig.DEBUG) {
-                                    logI(TAG, "Hooked: $executable")
-                                }
+                    Hooks.hook(
+                        executable, Hooks.EntryPointType.DIRECT,
+                        element.impl, Hooks.EntryPointType.DIRECT
+                    )
 
-                                Hooks.hook(
-                                    executable, Hooks.EntryPointType.CURRENT,
-                                    element.impl, Hooks.EntryPointType.DIRECT
-                                )
+                    element.applyCount++
 
-                                element.applyCount++
-
-                                if (element.hookOnce) {
-                                    element.hookFinished = true
-                                }
-                            }
-                        }
-                }
-            }
-
-            while (
-                curClazz != null &&
-                entry.value.any { it.applyCount < 1 } &&
-                curClazz.javaClass.simpleName != "Object"
-            ) {
-                apply(curClazz)
-                curClazz = curClazz.superclass
-            }
-
-            // remove invalid entries
-            entry.value.removeIf {
-                (it.applyCount < 1).apply {
-                    if (this@apply) {
-                        logI(TAG, "Invalid hook removed: ${it.pattern}")
+                    if (element.hookOnce) {
+                        element.hookFinished = true
+                        break
                     }
                 }
             }
-
-            entry.value.forEach {
-                it.hookFinished = true
-            }
         }
+
+        while (
+            !element.hookFinished &&
+            curClazz != null &&
+            curClazz.javaClass.simpleName != "Object"
+        ) {
+            applyForClass(curClazz)
+            curClazz = curClazz.superclass
+        }
+
+        if (!element.hookOnce && element.applyCount >= 1) {
+            element.hookFinished = true
+        }
+
+        return element.hookFinished
     }
 
     class ReturnValue(initialValue: Any? = null) {
@@ -236,7 +207,7 @@ class BulkHooker private constructor() {
 
     data class HookElement(
         val impl: HookTransformer,
-        val pattern: String,
+        val methodName: String,
         val hookOnce: Boolean,
         var hookFinished: Boolean = false,
         val paramCount: Int = -1,

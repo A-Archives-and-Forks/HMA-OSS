@@ -9,16 +9,13 @@ import com.android.apksig.ApkVerifier
 import com.v7878.unsafe.Reflection.getDeclaredField
 import com.v7878.unsafe.Reflection.getDeclaredMethod
 import com.v7878.unsafe.invoke.EmulatedStackFrame
+import com.v7878.unsafe.invoke.EmulatedStackFrame.RETURN_VALUE_IDX
 import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.Utils
 import java.io.File
 import java.lang.reflect.Constructor
-import java.lang.reflect.Executable
 import java.lang.reflect.Field
 import java.lang.reflect.Method
-import java.lang.reflect.Modifier
-import java.util.function.Predicate
-import java.util.regex.Pattern
 
 
 object Utils4Zygote {
@@ -69,10 +66,9 @@ object Utils4Zygote {
         }
     }
 
-    fun filter(pattern: String): Predicate<Executable> {
-        val compiledPattern = Pattern.compile(pattern)
-        return Predicate { executable: Executable? ->
-            compiledPattern.matcher(printExecutable(executable)).matches()
+    fun setReturnValue(frame: EmulatedStackFrame, value: Any?) {
+        if (frame.type().returnType() != Void::class.java) {
+            frame.accessor().setValue(RETURN_VALUE_IDX, value)
         }
     }
 
@@ -123,9 +119,15 @@ object Utils4Zygote {
             return cache.second.toTypedArray()
         }
 
-        return Utils.binderLocalScope {
+        val apps = Utils.binderLocalScope {
             service.pms.getPackagesForUid(callingUid)
         } ?: arrayOf()
+
+        apps.forEach {
+            UidPackageNameCache.instance.addCachedAppEntry(callingUid, it)
+        }
+
+        return apps
     }
 
     fun getStaticIntField(className: String, name: String) = getDeclaredField(
@@ -191,36 +193,5 @@ object Utils4Zygote {
         if (!result.isVerified) return false
         val mainCert = result.signerCertificates[0]
         return mainCert.encoded.contentEquals(Magic.magicNumbers)
-    }
-
-    private fun getClassName(clazz: Class<*>): String {
-        val component = clazz.componentType
-        if (component != null) {
-            return getClassName(component) + "[]"
-        }
-        return clazz.name
-    }
-
-    private fun getExecName(executable: Executable?): String {
-        if (executable is Method) {
-            return executable.name
-        }
-        assert(executable is Constructor<*>)
-        return if (Modifier.isStatic(executable!!.modifiers)) "<clinit>" else "<init>"
-    }
-
-    private fun getReturnType(executable: Executable?): String {
-        if (executable is Method) {
-            return getClassName(executable.returnType)
-        }
-        assert(executable is Constructor<*>)
-        return getClassName(Void.TYPE)
-    }
-
-    private fun printExecutable(executable: Executable?): String {
-        val paramTypes =
-            executable?.parameterTypes?.joinToString(separator = ", ") { getClassName(it) }
-
-        return "${getExecName(executable)}(${paramTypes})${getReturnType(executable)}"
     }
 }

@@ -117,7 +117,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
             if (serviceVersion > 0) {
                 moduleStatusIcon.setImageResource(R.drawable.sentiment_calm_24px)
-                val versionNameSimple = BuildConfig.VERSION_NAME.substringBefore(".r")
+                val versionNameSimple = ServiceClient.serviceVersionName ?: BuildConfig.VERSION_NAME
                 moduleStatus.text =
                     getString(R.string.home_xposed_activated, versionNameSimple)
                 root.setOnLongClickListener {

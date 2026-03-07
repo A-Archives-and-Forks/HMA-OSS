@@ -17,6 +17,7 @@ object SystemServerHook {
     private const val RUNTIME_INIT: String = "com.android.internal.os.RuntimeInit"
 
     var classLoader: ClassLoader? = null
+    var initialized = false
 
     @Throws(Throwable::class)
     fun onSystemServer(loader: ClassLoader?) {
@@ -26,16 +27,20 @@ object SystemServerHook {
 
         classLoader = loader
 
-        thread {
-            val pms = Utils4Zygote.waitForService("package") as IPackageManager
-            val pmn = Utils4Zygote.waitForService("package_native")
-            logD(TAG, "Got pms: $pms, $pmn")
+        if (!initialized) {
+            initialized = true
 
-            runCatching {
-                UserService.register(pms, pmn)
-                logI(TAG, "User service started")
-            }.onFailure {
-                logE(TAG, "System service crashed", it)
+            thread {
+                val pms = Utils4Zygote.waitForService("package") as IPackageManager
+                val pmn = Utils4Zygote.waitForService("package_native")
+                logD(TAG, "Got pms: $pms, $pmn")
+
+                runCatching {
+                    UserService.register(pms, pmn)
+                    logI(TAG, "User service started")
+                }.onFailure {
+                    logE(TAG, "System service crashed", it)
+                }
             }
         }
     }
