@@ -76,7 +76,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
     var config = JsonConfig().apply { detailLog = true }
         private set
 
-    var presetCache = PresetCacheHolder()
+    var presetCache: PresetCacheHolder? = null
         private set
 
     var filterHolder = FilterHolder()
@@ -97,7 +97,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
             logWithLevel(level, "AppPresets", msg)
         }
 
-        reloadPresets(false)
+        reloadPresets(presetCache == null)
     }
 
     private fun searchDataDir() {
@@ -527,7 +527,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
     }
 
     override fun handlePackageEvent(eventType: String?, packageName: String?, extras: Bundle?) {
-        if (eventType == null || packageName == null) return
+        if (eventType == null || packageName == null || presetCache == null) return
 
         AppPresets.instance.apply {
             when (eventType) {
@@ -543,7 +543,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
                         }
                     }
 
-                    if (handlePackageAdded(pms, packageName, presetCache)) {
+                    if (handlePackageAdded(pms, packageName, presetCache!!)) {
                         writePresetCache()
                     }
                 }
@@ -558,7 +558,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
                         appUid = -1
                     }
 
-                    if (handlePackageRemoved(packageName, presetCache)) {
+                    if (handlePackageRemoved(packageName, presetCache!!)) {
 
                         writePresetCache()
                     }

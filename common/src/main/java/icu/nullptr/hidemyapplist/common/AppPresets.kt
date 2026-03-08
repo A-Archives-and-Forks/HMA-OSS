@@ -55,8 +55,8 @@ class AppPresets private constructor() {
     val presetNames by lazy { presetList.map { it.name }.toTypedArray() }
     fun getPresetByName(name: String) = presetList.firstOrNull { it.name == name }
 
-    fun reloadPresets(appsList: List<ApplicationInfo>, holder: PresetCacheHolder, clearPresets: Boolean): PresetCacheHolder {
-        if (holder.cacheVersion == BuildConfig.APP_VERSION_CODE && !clearPresets) {
+    fun reloadPresets(appsList: List<ApplicationInfo>, holder: PresetCacheHolder?, clearPresets: Boolean): PresetCacheHolder {
+        if (holder != null && holder.cacheVersion == BuildConfig.APP_VERSION_CODE && !clearPresets) {
             ignoredForRiskyPackagesList.addAll(holder.gmsDependentApps)
 
             presetList.forEach { preset ->
