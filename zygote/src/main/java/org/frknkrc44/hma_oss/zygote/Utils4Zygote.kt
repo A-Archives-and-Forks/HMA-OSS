@@ -114,20 +114,9 @@ object Utils4Zygote {
 
     fun getCallingApps(service: HMAService, callingUid: Int): Array<String> {
         if (callingUid == Constants.UID_SYSTEM) return arrayOf()
-        val cache = UidPackageNameCache.instance.findCacheEntryByUid(callingUid)
-        if (cache != null) {
-            return cache.second.toTypedArray()
-        }
-
-        val apps = Utils.binderLocalScope {
+        return Utils.binderLocalScope {
             service.pms.getPackagesForUid(callingUid)
         } ?: arrayOf()
-
-        apps.forEach {
-            UidPackageNameCache.instance.addCachedAppEntry(callingUid, it)
-        }
-
-        return apps
     }
 
     fun getStaticIntField(className: String, name: String) = getDeclaredField(

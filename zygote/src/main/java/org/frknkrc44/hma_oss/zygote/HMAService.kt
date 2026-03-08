@@ -210,8 +210,6 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
 
     private fun installHooks() {
         getInstalledApplicationsCompat(pms, 0, 0).mapNotNullTo(systemApps) { appInfo ->
-            UidPackageNameCache.instance.addCachedAppEntry(appInfo.uid, appInfo.packageName)
-
             if (appInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0) appInfo.packageName else null
         }
 
@@ -534,14 +532,6 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
         AppPresets.instance.apply {
             when (eventType) {
                 Intent.ACTION_PACKAGE_ADDED -> {
-                    UidPackageNameCache.instance.apply {
-                        if (!isPackageNameExists(packageName)) {
-                            val uid = getPackageUidCompat(pms, packageName,
-                                0L, getCallingUserHandle().hashCode())
-                            addCachedAppEntry(uid, packageName)
-                        }
-                    }
-
                     if (packageName == BuildConfig.APP_PACKAGE_NAME && appUid < 0) {
                         val pkgInfo = getPackageInfoCompat(pms, packageName, 0L, 0)
                         if (verifyAppSignature(pkgInfo?.applicationInfo?.sourceDir)) {
@@ -562,8 +552,6 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
                     if (extras?.getBoolean(Intent.EXTRA_REPLACING) == true) {
                         return
                     }
-
-                    UidPackageNameCache.instance.removeCachedAppEntry(packageName)
 
                     if (packageName == BuildConfig.APP_PACKAGE_NAME && appUid >= 0) {
                         logI(TAG, "The manager app is uninstalled")
