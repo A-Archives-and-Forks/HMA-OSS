@@ -22,7 +22,7 @@ class ZygoteHook(private val service: HMAService) : IFrameworkHook {
             val gIDsIndex = param.args.indexOfFirst { it is IntArray }
             if (gIDsIndex < 0) return@hookBefore
 
-            val caller = param.args.lastOrNull { it is String } as String? ?: return@hookBefore
+            val caller = param.args.lastOrNull { it is String } as? String? ?: return@hookBefore
             var perms = service.getRestrictedZygotePermissions(caller) ?: return@hookBefore
             if (perms.isNotEmpty()) {
                 val gIDs = param.args[gIDsIndex] as IntArray

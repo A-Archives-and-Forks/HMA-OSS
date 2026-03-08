@@ -86,7 +86,7 @@ class BulkHooker private constructor() {
                 value.throwable = it
             }
 
-            if (value.throwable == null) {
+            if (value.throwable == null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 value.setResultWithoutReplace(frame.accessor().getValue(RETURN_VALUE_IDX))
             }
 

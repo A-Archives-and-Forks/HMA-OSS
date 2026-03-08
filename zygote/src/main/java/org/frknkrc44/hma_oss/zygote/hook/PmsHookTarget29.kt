@@ -53,7 +53,7 @@ class PmsHookTarget29(service: HMAService) : PmsHookTargetBase(service) {
                 PACKAGE_MANAGER_SERVICE_CLASS,
                 "getPackageInfoInternal",
             ) { param ->
-                val targetApp = param.getArgument(1) as String? ?: return@hookBefore
+                val targetApp = param.getArgument(1) as? String? ?: return@hookBefore
                 val callingUid = param.getArgument(4) as Int
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
                 logV(TAG, "@${param.methodName} incoming query: $callingUid => $targetApp")
@@ -77,7 +77,7 @@ class PmsHookTarget29(service: HMAService) : PmsHookTargetBase(service) {
                 PACKAGE_MANAGER_SERVICE_CLASS,
                 "getApplicationInfoInternal",
             ) { param ->
-                val targetApp = param.getArgument(1) as String? ?: return@hookBefore
+                val targetApp = param.getArgument(1) as? String? ?: return@hookBefore
                 val callingUid = param.getArgument(3) as Int
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
                 logV(TAG, "@${param.methodName} incoming query: $callingUid => $targetApp")
