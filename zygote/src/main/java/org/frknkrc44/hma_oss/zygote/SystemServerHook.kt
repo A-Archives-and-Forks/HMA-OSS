@@ -7,7 +7,6 @@ import com.v7878.unsafe.Reflection.getDeclaredMethod
 import com.v7878.unsafe.invoke.EmulatedStackFrame
 import com.v7878.unsafe.invoke.Transformers
 import com.v7878.vmtools.Hooks
-import org.frknkrc44.hma_oss.common.BuildConfig
 import kotlin.concurrent.thread
 
 @SuppressLint("PrivateApi")

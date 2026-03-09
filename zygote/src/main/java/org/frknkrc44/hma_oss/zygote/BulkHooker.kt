@@ -8,7 +8,6 @@ import com.v7878.unsafe.invoke.EmulatedStackFrame.RETURN_VALUE_IDX
 import com.v7878.unsafe.invoke.Transformers
 import com.v7878.vmtools.HookTransformer
 import com.v7878.vmtools.Hooks
-import org.frknkrc44.hma_oss.common.BuildConfig
 import org.frknkrc44.hma_oss.zygote.ZygoteEntry.TAG
 import java.lang.invoke.MethodHandle
 import java.lang.reflect.Executable

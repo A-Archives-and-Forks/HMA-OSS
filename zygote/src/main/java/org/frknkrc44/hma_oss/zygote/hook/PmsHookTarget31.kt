@@ -170,6 +170,6 @@ class PmsHookTarget31(service: HMAService) : PmsHookTargetBase(service) {
             }
         }
 
-        // super.load()
+        super.load()
     }
 }
