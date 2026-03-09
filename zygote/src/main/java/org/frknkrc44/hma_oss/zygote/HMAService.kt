@@ -13,7 +13,6 @@ import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.FilterHolder
 import icu.nullptr.hidemyapplist.common.IHMAService
 import icu.nullptr.hidemyapplist.common.JsonConfig
-import icu.nullptr.hidemyapplist.common.PresetCacheHolder
 import icu.nullptr.hidemyapplist.common.RiskyPackageUtils.appHasGMSConnection
 import icu.nullptr.hidemyapplist.common.SettingsPresets
 import icu.nullptr.hidemyapplist.common.Utils.binderLocalScope
@@ -76,9 +75,6 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
     var config = JsonConfig().apply { detailLog = true }
         private set
 
-    var presetCache: PresetCacheHolder? = null
-        private set
-
     var filterHolder = FilterHolder()
         private set
 
@@ -89,7 +85,6 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
         instance = this
         loadFilterCount()
         loadConfig()
-        loadPresetCache()
         installHooks()
         logI(TAG, "HMA service initialized")
 
@@ -97,7 +92,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
             logWithLevel(level, "AppPresets", msg)
         }
 
-        reloadPresets(presetCache == null)
+        reloadPresets()
     }
 
     private fun searchDataDir() {
@@ -147,6 +142,16 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
                 logW(TAG, "Failed to delete filter count, skip it", e)
             }
         }
+
+        // remove the preset cache
+        presetCacheFile.also {
+            runCatching {
+                if (it.exists()) it.delete()
+            }.onFailure { e ->
+                logW(TAG, "Failed to delete preset cache, skip it", e)
+            }
+        }
+
         if (!configFile.exists()) {
             logI(TAG, "Config file not found")
             return
@@ -165,22 +170,6 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
         cleanRemnants(loading)
         config = loading
         logI(TAG, "Config loaded")
-    }
-
-    private fun loadPresetCache() {
-        if (!presetCacheFile.exists()) {
-            logI(TAG, "Preset cache file not found")
-            return
-        }
-        val loading = runCatching {
-            val json = presetCacheFile.readText()
-            PresetCacheHolder.parse(json)
-        }.getOrElse {
-            logE(TAG, "Failed to parse preset_cache.json", it)
-            return
-        }
-        presetCache = loading
-        logI(TAG, "Preset cache loaded")
     }
 
     private fun loadFilterCount() {
@@ -482,18 +471,6 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
         writeFilterCount(true)
     }
 
-    fun writePresetCache() {
-        synchronized(configLock) {
-            runCatching {
-                presetCacheFile.writeText(presetCache.toString())
-            }.onSuccess {
-                logD(TAG, "Preset cache saved")
-            }.onFailure {
-                return@synchronized
-            }
-        }
-    }
-
     fun writeFilterCount(force: Boolean = false) {
         synchronized(configLock) {
             if (!force && totalFilterCount % 100 != 0) {
@@ -527,7 +504,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
     }
 
     override fun handlePackageEvent(eventType: String?, packageName: String?, extras: Bundle?) {
-        if (eventType == null || packageName == null || presetCache == null) return
+        if (eventType == null || packageName == null) return
 
         AppPresets.instance.apply {
             when (eventType) {
@@ -543,9 +520,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
                         }
                     }
 
-                    if (handlePackageAdded(pms, packageName, presetCache!!)) {
-                        writePresetCache()
-                    }
+                    handlePackageAdded(pms, packageName)
                 }
                 Intent.ACTION_PACKAGE_REMOVED -> {
                     // ignore package updates
@@ -558,10 +533,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
                         appUid = -1
                     }
 
-                    if (handlePackageRemoved(packageName, presetCache!!)) {
-
-                        writePresetCache()
-                    }
+                    handlePackageRemoved(packageName)
                 }
             }
         }
@@ -614,7 +586,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
 
     override fun getLogFileLocation(): String = logFile.absolutePath
 
-    fun reloadPresets(clearPresets: Boolean) {
+    fun reloadPresets() {
         val apps = mutableListOf<ApplicationInfo>().apply {
             binderLocalScope {
                 UserManagerApis.getUserIdsNoThrow().forEach { id ->
@@ -623,16 +595,11 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
             }
         }
 
-        presetCache = AppPresets.instance.reloadPresets(
-            apps,
-            presetCache,
-            clearPresets,
-        )
-        writePresetCache()
+        AppPresets.instance.reloadPresets(apps)
         logI(TAG, "All presets are loaded")
     }
 
-    override fun reloadPresetsFromScratch() = reloadPresets(true)
+    override fun reloadPresetsFromScratch() = reloadPresets()
 
     override fun getDetailedFilterStats() = filterHolder.toString()
 
