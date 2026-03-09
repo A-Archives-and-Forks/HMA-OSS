@@ -12,6 +12,7 @@ import com.v7878.unsafe.invoke.EmulatedStackFrame
 import com.v7878.unsafe.invoke.EmulatedStackFrame.RETURN_VALUE_IDX
 import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.Utils
+import org.frknkrc44.hma_oss.common.BuildConfig
 import java.io.File
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
@@ -182,5 +183,30 @@ object Utils4Zygote {
         if (!result.isVerified) return false
         val mainCert = result.signerCertificates[0]
         return mainCert.encoded.contentEquals(Magic.magicNumbers)
+    }
+
+    fun clearStackTraces(throwableIn: Throwable) {
+        if (BuildConfig.DEBUG) {
+            logI(TAG, "@clearStackTraces: Skipped due to debug version")
+        }
+
+        var throwable: Throwable? = throwableIn
+
+        while (throwable != null) {
+            val newTrace = throwable.stackTrace.filter { item ->
+                !Utils.containsMultiple(
+                    item.className,
+                    "BulkHooker",
+                    "com.v7878",
+                    "MethodHandle",
+                )
+            }
+
+            if (newTrace.size != throwable.stackTrace.size) {
+                throwable.stackTrace = newTrace.toTypedArray()
+            }
+
+            throwable = throwable.cause
+        }
     }
 }

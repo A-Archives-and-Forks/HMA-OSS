@@ -21,6 +21,8 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class org.frknkrc44.hma_oss.zygote.ZygoteEntry { premain(); main(); }
+-keep class com.v7878.*
+-keep class org.frknkrc44.hma_oss.zygote.BulkHooker { hook**(...); }
 -dontwarn android.content.pm.IPackageManager
 -dontwarn android.content.pm.ParceledListSlice
 -dontwarn android.os.SystemProperties

@@ -9,9 +9,12 @@ import icu.nullptr.hidemyapplist.common.Utils
 import org.frknkrc44.hma_oss.zygote.BulkHooker
 import org.frknkrc44.hma_oss.zygote.HMAService
 import org.frknkrc44.hma_oss.zygote.Utils4Zygote
+import org.frknkrc44.hma_oss.zygote.Utils4Zygote.clearStackTraces
 import org.frknkrc44.hma_oss.zygote.Utils4Zygote.getObjectField
 import org.frknkrc44.hma_oss.zygote.Utils4Zygote.getStaticIntField
+import org.frknkrc44.hma_oss.zygote.ZygoteConstants.ACTIVITY_STACK_SUPERVISOR_CLASS
 import org.frknkrc44.hma_oss.zygote.ZygoteConstants.ACTIVITY_STARTER_CLASS
+import org.frknkrc44.hma_oss.zygote.ZygoteConstants.ACTIVITY_TASK_SUPERVISOR_CLASS
 import org.frknkrc44.hma_oss.zygote.ZygoteConstants.COMPUTER_ENGINE_CLASS
 import org.frknkrc44.hma_oss.zygote.ZygoteConstants.PACKAGE_MANAGER_SERVICE_CLASS
 import org.frknkrc44.hma_oss.zygote.logD
@@ -52,8 +55,6 @@ class ActivityHook(private val service: HMAService) : IFrameworkHook {
                 }
             }
 
-            /*
-            // TODO: Maybe not required anymore?
             hookBefore(
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     ACTIVITY_TASK_SUPERVISOR_CLASS
@@ -62,32 +63,10 @@ class ActivityHook(private val service: HMAService) : IFrameworkHook {
                 },
                 "checkStartAnyActivityPermission",
             ) { param ->
-                var throwable = param.throwable
+                logV(TAG, "${param.methodName}: ${param.args.contentToString()}")
 
-                while (throwable != null) {
-                    val newTrace = throwable.stackTrace.filter { item ->
-                        !Utils.containsMultiple(
-                            item.className,
-                            "HookBridge",
-                            "LSPHooker",
-                            "LSPosed",
-                        )
-                    }
-
-                    if (newTrace.size != throwable.stackTrace.size) {
-                        throwable.stackTrace = newTrace.toTypedArray()
-
-                        val callingUid = param.args!!.lastOrNull { it is Int } as Int?
-
-                        logD(TAG, "@checkStartAnyActivityPermission: ${throwable.stackTrace.size - newTrace.size} remnants cleared for $callingUid!")
-
-                        service.increaseALFilterCount(callingUid)
-                    }
-
-                    throwable = throwable.cause
-                }
+                // just an empty hook that does nothing
             }
-             */
 
             if (!OSUtils.isSamsung()) {
                 hookBefore(

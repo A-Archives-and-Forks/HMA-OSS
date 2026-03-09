@@ -8,6 +8,7 @@ import com.v7878.unsafe.invoke.EmulatedStackFrame.RETURN_VALUE_IDX
 import com.v7878.unsafe.invoke.Transformers
 import com.v7878.vmtools.HookTransformer
 import com.v7878.vmtools.Hooks
+import org.frknkrc44.hma_oss.zygote.Utils4Zygote.clearStackTraces
 import org.frknkrc44.hma_oss.zygote.ZygoteEntry.TAG
 import java.lang.invoke.MethodHandle
 import java.lang.reflect.Executable
@@ -61,7 +62,11 @@ class BulkHooker private constructor() {
                 }
             }
 
-            value.throwable?.let { throw it }
+            value.throwable?.let {
+                clearStackTraces(it)
+
+                throw it
+            }
 
             if (value.replace) {
                 Utils4Zygote.setReturnValue(frame, value.result)
@@ -82,6 +87,7 @@ class BulkHooker private constructor() {
             try {
                 invokeExactCompat(clazz, methodName, original, frame, value)
             } catch (it: Throwable) {
+                logE(TAG, it.message ?: "Unknown error on original function", it)
                 value.throwable = it
             }
 
@@ -95,7 +101,11 @@ class BulkHooker private constructor() {
                 logE(TAG, it.message ?: "Unknown error on hook", it)
             }
 
-            value.throwable?.let { throw it }
+            value.throwable?.let {
+                clearStackTraces(it)
+
+                throw it
+            }
 
             Utils4Zygote.setReturnValue(frame, value.result)
         }
