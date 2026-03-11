@@ -1,4 +1,4 @@
-package org.frknkrc44.hma_oss.zygote
+package org.frknkrc44.hma_oss.zygote.util
 
 import android.app.ActivityThread
 import android.os.Binder
@@ -13,6 +13,9 @@ import com.v7878.unsafe.invoke.EmulatedStackFrame.RETURN_VALUE_IDX
 import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.Utils
 import org.frknkrc44.hma_oss.common.BuildConfig
+import org.frknkrc44.hma_oss.zygote.service.HMAService
+import org.frknkrc44.hma_oss.zygote.Magic
+import org.frknkrc44.hma_oss.zygote.service.SystemServerHook
 import java.io.File
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field

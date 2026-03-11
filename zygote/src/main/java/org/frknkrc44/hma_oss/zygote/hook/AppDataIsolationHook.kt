@@ -4,18 +4,19 @@ import android.os.Build
 import android.os.SystemProperties
 import androidx.annotation.RequiresApi
 import org.frknkrc44.hma_oss.common.BuildConfig
-import org.frknkrc44.hma_oss.zygote.BulkHooker
-import org.frknkrc44.hma_oss.zygote.HMAService
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote.getBooleanField
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote.getIntField
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote.getObjectField
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote.setBooleanField
-import org.frknkrc44.hma_oss.zygote.ZygoteConstants.PROCESS_LIST_CLASS
-import org.frknkrc44.hma_oss.zygote.ZygoteConstants.STORAGE_MANAGER_SERVICE_CLASS
-import org.frknkrc44.hma_oss.zygote.logD
-import org.frknkrc44.hma_oss.zygote.logE
-import org.frknkrc44.hma_oss.zygote.logI
+import org.frknkrc44.hma_oss.zygote.service.BulkHooker
+import org.frknkrc44.hma_oss.zygote.service.HMAService
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getBooleanField
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getIntField
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getObjectField
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.setBooleanField
+import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.PROCESS_LIST_CLASS
+import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.STORAGE_MANAGER_SERVICE_CLASS
+import org.frknkrc44.hma_oss.zygote.util.logD
+import org.frknkrc44.hma_oss.zygote.util.logE
+import org.frknkrc44.hma_oss.zygote.util.logI
+import java.util.Map
 
 @RequiresApi(Build.VERSION_CODES.R)
 class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
@@ -168,7 +169,7 @@ class AppDataIsolationHook(private val service: HMAService): IFrameworkHook {
             ) { param ->
                 if (!voldHookSkipped && service.config.altVoldAppDataIsolation && service.config.skipSystemAppDataIsolation) {
                     @Suppress("PLATFORM_CLASS_MAPPED_TO_KOTLIN")
-                    val pidPkgMap = param.getArgument(1) as java.util.Map<*, *>
+                    val pidPkgMap = param.getArgument(1) as Map<*, *>
                     val keysToRemove = mutableSetOf<Any>()
 
                     for (entry in pidPkgMap.entrySet()) {

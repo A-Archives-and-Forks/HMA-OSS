@@ -1,4 +1,4 @@
-package org.frknkrc44.hma_oss.zygote
+package org.frknkrc44.hma_oss.zygote.service
 
 import android.annotation.SuppressLint
 import android.content.pm.IPackageManager
@@ -7,6 +7,11 @@ import com.v7878.unsafe.Reflection.getDeclaredMethod
 import com.v7878.unsafe.invoke.EmulatedStackFrame
 import com.v7878.unsafe.invoke.Transformers
 import com.v7878.vmtools.Hooks
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
+import org.frknkrc44.hma_oss.zygote.util.logD
+import org.frknkrc44.hma_oss.zygote.util.logE
+import org.frknkrc44.hma_oss.zygote.util.logI
+import org.frknkrc44.hma_oss.zygote.util.logV
 import kotlin.concurrent.thread
 
 @SuppressLint("PrivateApi")

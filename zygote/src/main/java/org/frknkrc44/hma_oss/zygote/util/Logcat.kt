@@ -1,7 +1,8 @@
-package org.frknkrc44.hma_oss.zygote
+package org.frknkrc44.hma_oss.zygote.util
 
 import android.util.Log
 import org.frknkrc44.hma_oss.common.BuildConfig
+import org.frknkrc44.hma_oss.zygote.service.HMAService
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

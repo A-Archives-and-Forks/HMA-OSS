@@ -1,13 +1,15 @@
 package org.frknkrc44.hma_oss.zygote;
 
-import static org.frknkrc44.hma_oss.zygote.LogcatKt.logE;
-import static org.frknkrc44.hma_oss.zygote.LogcatKt.logI;
+import static org.frknkrc44.hma_oss.zygote.util.LogcatKt.logE;
+import static org.frknkrc44.hma_oss.zygote.util.LogcatKt.logI;
 
 import com.v7878.r8.annotations.DoNotObfuscate;
 import com.v7878.r8.annotations.DoNotObfuscateType;
 import com.v7878.r8.annotations.DoNotShrink;
 import com.v7878.r8.annotations.DoNotShrinkType;
 import com.v7878.zygisk.ZygoteLoader;
+
+import org.frknkrc44.hma_oss.zygote.service.SystemServerHook;
 
 @SuppressWarnings("all")
 @DoNotObfuscateType

@@ -1,13 +1,14 @@
 package org.frknkrc44.hma_oss.zygote.hook
 
 import icu.nullptr.hidemyapplist.common.Constants
-import org.frknkrc44.hma_oss.zygote.BulkHooker
-import org.frknkrc44.hma_oss.zygote.HMAService
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote
-import org.frknkrc44.hma_oss.zygote.ZygoteConstants.PACKAGE_MANAGER_SERVICE_CLASS
-import org.frknkrc44.hma_oss.zygote.logD
-import org.frknkrc44.hma_oss.zygote.logI
-import org.frknkrc44.hma_oss.zygote.logV
+import org.frknkrc44.hma_oss.zygote.service.BulkHooker
+import org.frknkrc44.hma_oss.zygote.service.HMAService
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
+import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.PACKAGE_MANAGER_SERVICE_CLASS
+import org.frknkrc44.hma_oss.zygote.util.logD
+import org.frknkrc44.hma_oss.zygote.util.logI
+import org.frknkrc44.hma_oss.zygote.util.logV
+import org.frknkrc44.hma_oss.zygote.service.HMAServiceCache
 
 class PmsHookTarget29(service: HMAService) : PmsHookTargetBase(service) {
 
@@ -31,7 +32,7 @@ class PmsHookTarget29(service: HMAService) : PmsHookTargetBase(service) {
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
                 val packageSettings = param.getArgument(1)
                 val targetApp = Utils4Zygote.getPackageNameFromPackageSettings(packageSettings)
-                if (service.shouldHideFromUid(callingUid, targetApp) == true) {
+                if (HMAServiceCache.instance.shouldHideFromUid(callingUid, targetApp) == true) {
                     param.result = true
                     service.increasePMFilterCount(callingUid)
                     logD(TAG, "@filterAppAccessLPr caller cache: $callingUid, target: $targetApp")
@@ -41,7 +42,7 @@ class PmsHookTarget29(service: HMAService) : PmsHookTargetBase(service) {
                 val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
                 if (caller != null) {
                     param.result = true
-                    service.putShouldHideUidCache(callingUid, caller, targetApp!!)
+                    HMAServiceCache.instance.putShouldHideUidCache(callingUid, caller, targetApp!!)
                     service.increasePMFilterCount(caller)
                     val last = lastFilteredApp.getAndSet(caller)
                     if (last != caller) logI(TAG, "@filterAppAccessLPr query from $caller")
@@ -57,7 +58,7 @@ class PmsHookTarget29(service: HMAService) : PmsHookTargetBase(service) {
                 val callingUid = param.getArgument(4) as Int
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
                 logV(TAG, "@${param.methodName} incoming query: $callingUid => $targetApp")
-                if (service.shouldHideFromUid(callingUid, targetApp) == true) {
+                if (HMAServiceCache.instance.shouldHideFromUid(callingUid, targetApp) == true) {
                     param.result = null
                     service.increasePMFilterCount(callingUid)
                     logD(TAG, "@${param.methodName} caller cache: $callingUid, target: $targetApp")
@@ -68,7 +69,7 @@ class PmsHookTarget29(service: HMAService) : PmsHookTargetBase(service) {
                 if (caller != null) {
                     logD(TAG, "@${param.methodName} caller: $callingUid $caller, target: $targetApp")
                     param.result = null
-                    service.putShouldHideUidCache(callingUid, caller, targetApp)
+                    HMAServiceCache.instance.putShouldHideUidCache(callingUid, caller, targetApp)
                     service.increasePMFilterCount(caller)
                 }
             }
@@ -81,7 +82,7 @@ class PmsHookTarget29(service: HMAService) : PmsHookTargetBase(service) {
                 val callingUid = param.getArgument(3) as Int
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
                 logV(TAG, "@${param.methodName} incoming query: $callingUid => $targetApp")
-                if (service.shouldHideFromUid(callingUid, targetApp) == true) {
+                if (HMAServiceCache.instance.shouldHideFromUid(callingUid, targetApp) == true) {
                     param.result = null
                     service.increasePMFilterCount(callingUid)
                     logD(TAG, "@${param.methodName} caller cache: $callingUid, target: $targetApp")
@@ -92,7 +93,7 @@ class PmsHookTarget29(service: HMAService) : PmsHookTargetBase(service) {
                 if (caller != null) {
                     logD(TAG, "@${param.methodName} caller: $callingUid $caller, target: $targetApp")
                     param.result = null
-                    service.putShouldHideUidCache(callingUid, caller, targetApp)
+                    HMAServiceCache.instance.putShouldHideUidCache(callingUid, caller, targetApp)
                     service.increasePMFilterCount(caller)
                 }
             }

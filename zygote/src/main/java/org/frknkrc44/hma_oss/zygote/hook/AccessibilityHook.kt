@@ -3,12 +3,13 @@ package org.frknkrc44.hma_oss.zygote.hook
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.pm.ParceledListSlice
 import icu.nullptr.hidemyapplist.common.settings_presets.AccessibilityPreset
-import org.frknkrc44.hma_oss.zygote.BulkHooker
-import org.frknkrc44.hma_oss.zygote.HMAService
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote
-import org.frknkrc44.hma_oss.zygote.ZygoteConstants.ACCESSIBILITY_SERVICE_CLASS
-import org.frknkrc44.hma_oss.zygote.logD
-import org.frknkrc44.hma_oss.zygote.logE
+import org.frknkrc44.hma_oss.zygote.service.BulkHooker
+import org.frknkrc44.hma_oss.zygote.service.HMAService
+import org.frknkrc44.hma_oss.zygote.service.HookParam
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
+import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.ACCESSIBILITY_SERVICE_CLASS
+import org.frknkrc44.hma_oss.zygote.util.logD
+import org.frknkrc44.hma_oss.zygote.util.logE
 
 class AccessibilityHook(private val service: HMAService) : IFrameworkHook {
     override val TAG = "AccessibilityHook"
@@ -44,7 +45,7 @@ class AccessibilityHook(private val service: HMAService) : IFrameworkHook {
     private fun callerIsSpoofed(caller: String) =
         service.getEnabledSettingsPresets(caller).contains(AccessibilityPreset.NAME)
 
-    private fun hookedMethod(param: BulkHooker.HookParam) {
+    private fun hookedMethod(param: HookParam) {
         try {
             val callingApps = Utils4Zygote.getCallingApps(service)
             if (callingApps.isEmpty()) return

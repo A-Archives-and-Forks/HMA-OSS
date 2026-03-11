@@ -1,4 +1,4 @@
-package org.frknkrc44.hma_oss.zygote
+package org.frknkrc44.hma_oss.zygote.service
 
 import android.content.Intent
 import android.content.pm.ApplicationInfo
@@ -25,7 +25,7 @@ import icu.nullptr.hidemyapplist.common.Utils.removeIf
 import icu.nullptr.hidemyapplist.common.app_presets.DetectorAppsPreset
 import icu.nullptr.hidemyapplist.common.settings_presets.ReplacementItem
 import org.frknkrc44.hma_oss.common.BuildConfig
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote.verifyAppSignature
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.verifyAppSignature
 import org.frknkrc44.hma_oss.zygote.hook.AccessibilityHook
 import org.frknkrc44.hma_oss.zygote.hook.ActivityHook
 import org.frknkrc44.hma_oss.zygote.hook.AppDataIsolationHook
@@ -40,12 +40,18 @@ import org.frknkrc44.hma_oss.zygote.hook.PmsHookTarget33
 import org.frknkrc44.hma_oss.zygote.hook.PmsHookTarget34
 import org.frknkrc44.hma_oss.zygote.hook.PmsPackageEventsHook
 import org.frknkrc44.hma_oss.zygote.hook.ZygoteHook
+import org.frknkrc44.hma_oss.zygote.util.logD
+import org.frknkrc44.hma_oss.zygote.util.logE
+import org.frknkrc44.hma_oss.zygote.util.logI
+import org.frknkrc44.hma_oss.zygote.util.logW
+import org.frknkrc44.hma_oss.zygote.util.logWithLevel
 import rikka.hidden.compat.ActivityManagerApis
 import rikka.hidden.compat.UserManagerApis
 import java.io.File
 import java.lang.reflect.Modifier
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.collections.get
 
 class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
 
@@ -69,7 +75,6 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
     val systemApps = mutableSetOf<String>()
     private val frameworkHooks = mutableSetOf<IFrameworkHook>()
     val executor: ExecutorService = Executors.newSingleThreadExecutor()
-    private val uidHideCache = mutableListOf<Triple<Int, String, MutableList<String>>>()
     internal var appUid = 0
 
     var config = JsonConfig().apply { detailLog = true }
@@ -247,8 +252,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
     fun increaseFilterCount(uid: Int?, amount: Int = 1, filterType: FilterHolder.FilterType) {
         if (uid == null || amount < 1) return
 
-        val caller = uidHideCache.firstOrNull { it.first == uid }?.second
-        if (caller == null) return
+        val caller = HMAServiceCache.instance.findCallerByUid(uid) ?: return
 
         return increaseFilterCount(caller, amount, filterType)
     }
@@ -316,21 +320,6 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
     fun isAppInGMSIgnoredPackages(caller: String, query: String) =
         (caller in Constants.gmsPackages) && appHasGMSConnection(query)
 
-    fun shouldHideFromUid(uid: Int, query: String?): Boolean? {
-        if (query == null) return null
-
-        return uidHideCache.any { it.first == uid && it.third.contains(query) }
-    }
-
-    fun putShouldHideUidCache(uid: Int, caller: String, query: String) {
-        val findList = uidHideCache.firstOrNull { it.first == uid }
-        if (findList != null) {
-            findList.third.add(query)
-        } else {
-            uidHideCache.add(Triple(uid, caller, mutableListOf(query)))
-        }
-    }
-
     fun shouldHide(caller: String?, query: String?): Boolean {
         if (caller == null || query == null) return false
         if (caller == BuildConfig.APP_PACKAGE_NAME) return false
@@ -396,10 +385,17 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
 
         try {
             val uid = getPackageUidCompat(pms, query, 0L, callingHandle.hashCode())
-            logD(TAG, "@shouldHideInstallationSource UID for $caller, ${callingHandle.hashCode()}: $query, $uid")
+            logD(
+                TAG,
+                "@shouldHideInstallationSource UID for $caller, ${callingHandle.hashCode()}: $query, $uid"
+            )
             if (uid < 0) return Constants.FAKE_INSTALLATION_SOURCE_DISABLED // invalid package installation source request
         } catch (e: Throwable) {
-            logD(TAG, "@shouldHideInstallationSource UID error for $caller, ${callingHandle.hashCode()}", e)
+            logD(
+                TAG,
+                "@shouldHideInstallationSource UID error for $caller, ${callingHandle.hashCode()}",
+                e
+            )
             return Constants.FAKE_INSTALLATION_SOURCE_DISABLED
         }
 
@@ -441,7 +437,7 @@ class HMAService(val pms: IPackageManager, val pmn: Any?) : IHMAService.Stub() {
                 config = newConfig
                 configFile.writeText(json)
                 frameworkHooks.forEach(IFrameworkHook::onConfigChanged)
-                uidHideCache.clear()
+                HMAServiceCache.instance.clearUidCache()
 
                 // remove filter counts for apps if they are not in config
                 filterHolder.filterCounts.removeIf { key, _ -> !config.scope.containsKey(key) }

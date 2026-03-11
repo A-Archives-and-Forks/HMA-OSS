@@ -7,11 +7,12 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import org.frknkrc44.hma_oss.zygote.BulkHooker
-import org.frknkrc44.hma_oss.zygote.HMAService
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote
-import org.frknkrc44.hma_oss.zygote.ZygoteConstants.CONTENT_PROVIDER_TRANSPORT_CLASS
-import org.frknkrc44.hma_oss.zygote.logD
+import org.frknkrc44.hma_oss.zygote.service.BulkHooker
+import org.frknkrc44.hma_oss.zygote.service.HMAService
+import org.frknkrc44.hma_oss.zygote.service.HookParam
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
+import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.CONTENT_PROVIDER_TRANSPORT_CLASS
+import org.frknkrc44.hma_oss.zygote.util.logD
 
 class ContentProviderHook(private val service: HMAService): IFrameworkHook {
     override val TAG = "ContentProviderHook"
@@ -155,7 +156,7 @@ class ContentProviderHook(private val service: HMAService): IFrameworkHook {
         }
     }
 
-    private fun getCallingPackages(param: BulkHooker.HookParam) = try {
+    private fun getCallingPackages(param: HookParam) = try {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val attrSource = param.args.first { it is AttributionSource } as AttributionSource
             arrayOf(attrSource.packageName)

@@ -6,20 +6,19 @@ import android.os.Build
 import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.OSUtils
 import icu.nullptr.hidemyapplist.common.Utils
-import org.frknkrc44.hma_oss.zygote.BulkHooker
-import org.frknkrc44.hma_oss.zygote.HMAService
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote.clearStackTraces
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote.getObjectField
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote.getStaticIntField
-import org.frknkrc44.hma_oss.zygote.ZygoteConstants.ACTIVITY_STACK_SUPERVISOR_CLASS
-import org.frknkrc44.hma_oss.zygote.ZygoteConstants.ACTIVITY_STARTER_CLASS
-import org.frknkrc44.hma_oss.zygote.ZygoteConstants.ACTIVITY_TASK_SUPERVISOR_CLASS
-import org.frknkrc44.hma_oss.zygote.ZygoteConstants.COMPUTER_ENGINE_CLASS
-import org.frknkrc44.hma_oss.zygote.ZygoteConstants.PACKAGE_MANAGER_SERVICE_CLASS
-import org.frknkrc44.hma_oss.zygote.logD
-import org.frknkrc44.hma_oss.zygote.logI
-import org.frknkrc44.hma_oss.zygote.logV
+import org.frknkrc44.hma_oss.zygote.service.BulkHooker
+import org.frknkrc44.hma_oss.zygote.service.HMAService
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getObjectField
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getStaticIntField
+import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.ACTIVITY_STACK_SUPERVISOR_CLASS
+import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.ACTIVITY_STARTER_CLASS
+import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.ACTIVITY_TASK_SUPERVISOR_CLASS
+import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.COMPUTER_ENGINE_CLASS
+import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.PACKAGE_MANAGER_SERVICE_CLASS
+import org.frknkrc44.hma_oss.zygote.util.logD
+import org.frknkrc44.hma_oss.zygote.util.logI
+import org.frknkrc44.hma_oss.zygote.util.logV
 
 class ActivityHook(private val service: HMAService) : IFrameworkHook {
     override val TAG = "ActivityHook"

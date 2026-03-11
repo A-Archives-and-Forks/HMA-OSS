@@ -1,4 +1,4 @@
-package org.frknkrc44.hma_oss.zygote
+package org.frknkrc44.hma_oss.zygote.util
 
 object ZygoteConstants {
     const val COMPUTER_ENGINE_CLASS = "com.android.server.pm.ComputerEngine"

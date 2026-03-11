@@ -3,10 +3,10 @@ package org.frknkrc44.hma_oss.zygote.hook
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import org.frknkrc44.hma_oss.zygote.BulkHooker
-import org.frknkrc44.hma_oss.zygote.HMAService
-import org.frknkrc44.hma_oss.zygote.ZygoteConstants.PACKAGE_MANAGER_SERVICE_CLASS
-import org.frknkrc44.hma_oss.zygote.logI
+import org.frknkrc44.hma_oss.zygote.service.BulkHooker
+import org.frknkrc44.hma_oss.zygote.service.HMAService
+import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.PACKAGE_MANAGER_SERVICE_CLASS
+import org.frknkrc44.hma_oss.zygote.util.logI
 
 class PmsPackageEventsHook(private val service: HMAService) : IFrameworkHook {
     override val TAG = "PmsPackageEventsHook"

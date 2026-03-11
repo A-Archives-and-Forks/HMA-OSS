@@ -1,4 +1,4 @@
-package org.frknkrc44.hma_oss.zygote
+package org.frknkrc44.hma_oss.zygote.service
 
 import android.content.AttributionSource
 import android.content.pm.IPackageManager
@@ -7,8 +7,12 @@ import android.os.Bundle
 import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.Utils.getPackageInfoCompat
 import org.frknkrc44.hma_oss.common.BuildConfig
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote.getStaticIntField
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote.verifyAppSignature
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getStaticIntField
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.verifyAppSignature
+import org.frknkrc44.hma_oss.zygote.util.logD
+import org.frknkrc44.hma_oss.zygote.util.logE
+import org.frknkrc44.hma_oss.zygote.util.logI
 import rikka.hidden.compat.ActivityManagerApis
 import rikka.hidden.compat.adapter.UidObserverAdapter
 
@@ -73,7 +77,11 @@ object UserService {
             }
             logD(TAG, "Client uid: $appUid")
         } catch (e: Throwable) {
-            logE(TAG, "Fatal: Cannot get package details\nCompile this app from source with your changes", e)
+            logE(
+                TAG,
+                "Fatal: Cannot get package details\nCompile this app from source with your changes",
+                e
+            )
         }
 
         Utils4Zygote.waitForService("activity")

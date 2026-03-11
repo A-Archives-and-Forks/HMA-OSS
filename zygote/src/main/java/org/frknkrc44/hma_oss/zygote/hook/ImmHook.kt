@@ -8,13 +8,14 @@ import android.view.inputmethod.InputMethodSubtype
 import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.Utils
 import icu.nullptr.hidemyapplist.common.settings_presets.InputMethodPreset
-import org.frknkrc44.hma_oss.zygote.BulkHooker
-import org.frknkrc44.hma_oss.zygote.HMAService
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote
-import org.frknkrc44.hma_oss.zygote.ZygoteConstants.IMM_IMPL_CLASS
-import org.frknkrc44.hma_oss.zygote.ZygoteConstants.IMM_SERVICE_CLASS
-import org.frknkrc44.hma_oss.zygote.logD
-import org.frknkrc44.hma_oss.zygote.logV
+import org.frknkrc44.hma_oss.zygote.service.BulkHooker
+import org.frknkrc44.hma_oss.zygote.service.HMAService
+import org.frknkrc44.hma_oss.zygote.service.HookParam
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
+import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.IMM_IMPL_CLASS
+import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.IMM_SERVICE_CLASS
+import org.frknkrc44.hma_oss.zygote.util.logD
+import org.frknkrc44.hma_oss.zygote.util.logV
 import java.util.Collections
 
 class ImmHook(private val service: HMAService) : IFrameworkHook {
@@ -145,7 +146,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
         }
     }
 
-    private fun listHook(param: BulkHooker.HookParam) {
+    private fun listHook(param: HookParam) {
         val callingApps = Utils4Zygote.getCallingApps(service)
 
         val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
@@ -166,7 +167,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
         }
     }
 
-    private fun subtypeHook(param: BulkHooker.HookParam) {
+    private fun subtypeHook(param: HookParam) {
         val callingApps = Utils4Zygote.getCallingApps(service)
 
         val caller = callingApps.firstOrNull { callerIsSpoofed(it) }
@@ -179,7 +180,7 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
         }
     }
 
-    private fun subtypeListHook(param: BulkHooker.HookParam) {
+    private fun subtypeListHook(param: HookParam) {
         val callingApps = Utils4Zygote.getCallingApps(service)
 
         val caller = callingApps.firstOrNull { callerIsSpoofed(it) }

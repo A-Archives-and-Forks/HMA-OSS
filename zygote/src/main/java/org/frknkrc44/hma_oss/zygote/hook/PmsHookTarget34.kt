@@ -7,15 +7,16 @@ import androidx.annotation.RequiresApi
 import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.Constants.VENDING_PACKAGE_NAME
 import icu.nullptr.hidemyapplist.common.Utils
-import org.frknkrc44.hma_oss.zygote.BulkHooker
-import org.frknkrc44.hma_oss.zygote.HMAService
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote.findConstructor
-import org.frknkrc44.hma_oss.zygote.Utils4Zygote.findMethod
-import org.frknkrc44.hma_oss.zygote.ZygoteConstants.APPS_FILTER_IMPL_CLASS
-import org.frknkrc44.hma_oss.zygote.ZygoteConstants.PACKAGE_MANAGER_SERVICE_CLASS
-import org.frknkrc44.hma_oss.zygote.logD
-import org.frknkrc44.hma_oss.zygote.logI
+import org.frknkrc44.hma_oss.zygote.service.BulkHooker
+import org.frknkrc44.hma_oss.zygote.service.HMAService
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.findConstructor
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.findMethod
+import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.APPS_FILTER_IMPL_CLASS
+import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.PACKAGE_MANAGER_SERVICE_CLASS
+import org.frknkrc44.hma_oss.zygote.util.logD
+import org.frknkrc44.hma_oss.zygote.util.logI
+import org.frknkrc44.hma_oss.zygote.service.HMAServiceCache
 
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 class PmsHookTarget34(service: HMAService) : PmsHookTargetBase(service) {
@@ -72,7 +73,7 @@ class PmsHookTarget34(service: HMAService) : PmsHookTargetBase(service) {
                 val callingUid = param.getArgument(2) as Int
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
                 val targetApp = Utils4Zygote.getPackageNameFromPackageSettings(param.getArgument(4)) // PackageSettings <- PackageStateInternal
-                if (service.shouldHideFromUid(callingUid, targetApp) == true) {
+                if (HMAServiceCache.instance.shouldHideFromUid(callingUid, targetApp) == true) {
                     param.result = true
                     service.increasePMFilterCount(callingUid)
                     logD(TAG, "@shouldFilterApplication caller cache: $callingUid, target: $targetApp")
@@ -85,7 +86,7 @@ class PmsHookTarget34(service: HMAService) : PmsHookTargetBase(service) {
                 val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
                 if (caller != null) {
                     param.result = true
-                    service.putShouldHideUidCache(callingUid, caller, targetApp!!)
+                    HMAServiceCache.instance.putShouldHideUidCache(callingUid, caller, targetApp!!)
                     service.increasePMFilterCount(caller)
                     val last = lastFilteredApp.getAndSet(caller)
                     if (last != caller) logI(TAG, "@shouldFilterApplication: query from $caller")
@@ -108,7 +109,7 @@ class PmsHookTarget34(service: HMAService) : PmsHookTargetBase(service) {
                 val callingUid = Binder.getCallingUid()
                 if (callingUid == Constants.UID_SYSTEM) return@hookBefore
                 val targetApp = param.getArgument(1).toString()
-                if (service.shouldHideFromUid(callingUid, targetApp) == true) {
+                if (HMAServiceCache.instance.shouldHideFromUid(callingUid, targetApp) == true) {
                     param.result = null
                     service.increasePMFilterCount(callingUid)
                     logD(TAG, "@getArchivedPackageInternal caller cache: $callingUid, target: $targetApp")
@@ -118,7 +119,7 @@ class PmsHookTarget34(service: HMAService) : PmsHookTargetBase(service) {
                 val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
                 if (caller != null) {
                     param.result = null
-                    service.putShouldHideUidCache(callingUid, caller, targetApp)
+                    HMAServiceCache.instance.putShouldHideUidCache(callingUid, caller, targetApp)
                     service.increasePMFilterCount(caller)
                     val last = lastFilteredApp.getAndSet(caller)
                     if (last != caller) logI(TAG, "@getArchivedPackageInternal: query from $caller")
