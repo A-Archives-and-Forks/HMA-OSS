@@ -61,6 +61,10 @@ class AppPresets private constructor() {
         presetList.forEach { it.clearPackageList() }
 
         for (appInfo in appsList) {
+            when (appInfo.packageName) {
+                "android" -> continue
+            }
+
             runCatching {
                 tryToAddIntoGMSConnectionList(appInfo, appInfo.packageName) {
                     loggerFunction?.invoke(Log.DEBUG, it)
