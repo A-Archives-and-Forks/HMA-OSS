@@ -16,8 +16,8 @@
     <string name="config_damaged">File konfigurasi rusak. Harap bersihkan data aplikasi</string>
     <string name="edit_list">Edit daftar</string>
     <string name="delete">Hapus</string>
-    <string name="enabled">Diaktifkan</string>
-    <string name="disabled">Dinonaktifkan</string>
+    <string name="enabled">Aktif</string>
+    <string name="disabled">Nonaktif</string>
     <string name="work_mode">Mode kerja</string>
     <string name="blacklist">Daftar hitam</string>
     <string name="whitelist">Daftar putih</string>
@@ -87,7 +87,7 @@
     <string name="app_choose_template">Pilih templat</string>
     <string name="app_choose_preset">Pilih preset</string>
     <string name="app_exclude_system_apps">Kecualikan apl sistem</string>
-    <string name="app_exclude_system_apps_summary">Matikan opsi ini hanya jika benar-benar diperlukan. Kemungkinan menyebabkan crash jika dinonaktifkan</string>
+    <string name="app_exclude_system_apps_summary">Matikan opsi ini hanya jika benar-benar diperlukan. Kemungkinan menyebabkan kerusakan jika dinonaktifkan</string>
     <string name="app_template_using">Menggunakan %d templat</string>
     <string name="app_preset_using">Menggunakan %d preset</string>
     <string name="app_settings_preset_using">Menggunakan %d preset setelan</string>
@@ -111,7 +111,7 @@
     <string name="app_launch">Luncurkan</string>
     <string name="app_launch_failed">Peluncuran apl gagal, periksa log untuk detail lebih lanjut</string>
     <string name="app_restrict_zygote_permissions">Batasi izin Zygote aplikasi</string>
-    <string name="app_restrict_zygote_permissions_desc">Opsi ini dapat menyebabkan crash atau deteksi palsu. Gunakan dengan bijak.</string>
+    <string name="app_restrict_zygote_permissions_desc">Opsi ini dapat menyebabkan kerusakan atau deteksi palsu. Gunakan dengan bijak.</string>
     <!-- Presets -->
     <string name="title_preset">Preset</string>
     <string name="title_settings_preset">Preset setelan</string>
