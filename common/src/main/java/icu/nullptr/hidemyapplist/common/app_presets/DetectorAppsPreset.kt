@@ -35,6 +35,8 @@ class DetectorAppsPreset  : BasePreset(NAME) {
         "com.joeykrim.rootcheck",
         "com.studio.duckdetector",
         "com.chuqniudetector",
+        "com.chunqiudetector",
+        "com.longz.detector",
 
         // Add more detector apps (thanks @Yurii0307)
         "com.lingqing.detector",

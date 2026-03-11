@@ -13,6 +13,11 @@ class AccessibilityAppsPreset(private val appPresets: AppPresets) : BasePreset(N
     override val exactPackageNames = setOf<String>()
 
     override fun canBeAddedIntoPreset(appInfo: ApplicationInfo): Boolean {
+        // skip detector apps
+        if (appPresets.getPresetByName(DetectorAppsPreset.NAME)?.containsPackage(appInfo.packageName) ?: false) {
+            return false
+        }
+
         return checkSplitPackages(appInfo) { key, zipFile ->
             val manifestStr = appPresets.readManifest(key, zipFile)
 
