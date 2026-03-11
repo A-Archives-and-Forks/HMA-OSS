@@ -13,6 +13,7 @@ import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.navArgs
+import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceDataStore
 import androidx.preference.PreferenceFragmentCompat
@@ -132,7 +133,6 @@ class AppSettingsV2Fragment : Fragment(R.layout.fragment_settings) {
         override fun getBoolean(key: String, defValue: Boolean): Boolean {
             return when (key) {
                 "enableHide" -> pack.enabled
-                "useWhiteList" -> pack.config.useWhitelist
                 "excludeSystemApps" -> pack.config.excludeSystemApps
                 "hideInstallationSource" -> pack.config.hideInstallationSource
                 "hideSystemInstallationSource" -> pack.config.hideSystemInstallationSource
@@ -146,13 +146,26 @@ class AppSettingsV2Fragment : Fragment(R.layout.fragment_settings) {
         override fun putBoolean(key: String, value: Boolean) {
             when (key) {
                 "enableHide" -> pack.enabled = value
-                "useWhiteList" -> pack.config.useWhitelist = value
                 "excludeSystemApps" -> pack.config.excludeSystemApps = value
                 "hideInstallationSource" -> pack.config.hideInstallationSource = value
                 "hideSystemInstallationSource" -> pack.config.hideSystemInstallationSource = value
                 "excludeTargetInstallationSource" -> pack.config.excludeTargetInstallationSource = value
                 "invertActivityLaunchProtection" -> pack.config.invertActivityLaunchProtection = value
                 "excludeVoldIsolation" -> pack.config.excludeVoldIsolation = value
+                else -> throw IllegalArgumentException("Invalid key: $key")
+            }
+        }
+
+        override fun getString(key: String, defValue: String?): String {
+            return when (key) {
+                "useWhiteList" -> if (pack.config.useWhitelist) "1" else "0"
+                else -> throw IllegalArgumentException("Invalid key: $key")
+            }
+        }
+
+        override fun putString(key: String, value: String?) {
+            when (key) {
+                "useWhiteList" -> pack.config.useWhitelist = value == "1"
                 else -> throw IllegalArgumentException("Invalid key: $key")
             }
         }
@@ -353,16 +366,30 @@ class AppSettingsV2Fragment : Fragment(R.layout.fragment_settings) {
             preferenceManager.preferenceDataStore = preferenceDataStore
             setPreferencesFromResource(R.xml.app_settings_template_config_v2, rootKey)
 
-            findPreference<SwitchPreferenceCompat>("useWhiteList")?.setOnPreferenceChangeListener { _, newValue ->
-                val useWhitelist = newValue as Boolean
+            findPreference<ListPreference>("useWhiteList")?.apply {
+                val excludeSystemApps = findPreference<SwitchPreferenceCompat>("excludeSystemApps")
 
-                pack.config.applyTemplates.clear()
-                pack.config.extraAppList.clear()
-                pack.config.extraOppositeAppList.clear()
-                updateApplyTemplates()
-                updateExtraAppList(useWhitelist)
-                updateExtraOppositeAppList(useWhitelist)
-                true
+                entries = arrayOf(
+                    getString(R.string.blacklist),
+                    getString(R.string.whitelist),
+                )
+                entryValues = arrayOf("0", "1")
+
+                excludeSystemApps?.isEnabled = value == "1"
+
+                setOnPreferenceChangeListener { _, newValue ->
+                    val useWhitelist = newValue == "1"
+
+                    pack.config.applyTemplates.clear()
+                    pack.config.extraAppList.clear()
+                    pack.config.extraOppositeAppList.clear()
+                    updateApplyTemplates()
+                    updateExtraAppList(useWhitelist)
+                    updateExtraOppositeAppList(useWhitelist)
+
+                    excludeSystemApps?.isEnabled = useWhitelist
+                    true
+                }
             }
             findPreference<Preference>("applyTemplates")?.setOnPreferenceClickListener {
                 val templates = ConfigManager.getTemplateList().mapNotNull {

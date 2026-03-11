@@ -6,6 +6,7 @@ import android.util.Log
 import icu.nullptr.hidemyapplist.common.RiskyPackageUtils.ignoredForRiskyPackagesList
 import icu.nullptr.hidemyapplist.common.RiskyPackageUtils.tryToAddIntoGMSConnectionList
 import icu.nullptr.hidemyapplist.common.Utils.getPackageInfoCompat
+import icu.nullptr.hidemyapplist.common.app_presets.AccessibilityAppsPreset
 import icu.nullptr.hidemyapplist.common.app_presets.BasePreset
 import icu.nullptr.hidemyapplist.common.app_presets.CustomROMPreset
 import icu.nullptr.hidemyapplist.common.app_presets.DetectorAppsPreset
@@ -145,7 +146,6 @@ class AppPresets private constructor() {
         presetList.add(XposedModulesPreset())
         presetList.add(SuspiciousAppsPreset())
         presetList.add(SDhizukuAppsPreset(this))
+        presetList.add(AccessibilityAppsPreset(this))
     }
 }
-
-
