@@ -53,9 +53,18 @@ object Logcat {
         Log.i("HMA-OSS", msg)
     }
 
+    @JvmStatic
     fun logV(tag: String, msg: String, cause: Throwable? = null) = logWithLevel(Log.VERBOSE, tag, msg, cause)
+
+    @JvmStatic
     fun logD(tag: String, msg: String, cause: Throwable? = null) = logWithLevel(Log.DEBUG, tag, msg, cause)
+
+    @JvmStatic
     fun logI(tag: String, msg: String, cause: Throwable? = null) = logWithLevel(Log.INFO, tag, msg, cause)
+
+    @JvmStatic
     fun logW(tag: String, msg: String, cause: Throwable? = null) = logWithLevel(Log.WARN, tag, msg, cause)
+
+    @JvmStatic
     fun logE(tag: String, msg: String, cause: Throwable? = null) = logWithLevel(Log.ERROR, tag, msg, cause)
 }

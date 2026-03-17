@@ -1,7 +1,7 @@
 package org.frknkrc44.hma_oss.zygote;
 
-import static org.frknkrc44.hma_oss.zygote.util.LogcatKt.logE;
-import static org.frknkrc44.hma_oss.zygote.util.LogcatKt.logI;
+import static org.frknkrc44.hma_oss.zygote.util.Logcat.logE;
+import static org.frknkrc44.hma_oss.zygote.util.Logcat.logI;
 
 import com.v7878.r8.annotations.DoNotObfuscate;
 import com.v7878.r8.annotations.DoNotObfuscateType;
