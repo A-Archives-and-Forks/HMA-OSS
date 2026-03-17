@@ -33,12 +33,14 @@ object Logcat {
         if (level <= Log.DEBUG && HMAService.instance?.config?.detailLog == false) return
         if (level == Log.VERBOSE && !BuildConfig.DEBUG) return
 
-        val parsedLog = parseLog(level, tag, msg, cause)
+        val parsedMsg = parseLog(level, tag, msg, cause)
 
-        HMAService.instance?.executor?.execute {
-            HMAService.instance?.addLog(parsedLog)
-            println(parsedLog)
-        } ?: println(parsedLog)
+        HMAService.instance?.apply {
+            executor.execute {
+                addLog(parsedMsg)
+                println(parsedMsg)
+            }
+        } ?: println(parsedMsg)
     }
 
     private fun println(msg: String) {
