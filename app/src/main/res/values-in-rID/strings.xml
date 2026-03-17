@@ -13,7 +13,7 @@
     <string name="title_about_fork">Tentang cabang ini</string>
     <string name="do_not_dual">Jangan pasang HMA pada pengguna kedua</string>
     <string name="show_crash_log">Tampilkan log kerusakan</string>
-    <string name="config_damaged">File konfigurasi rusak. Harap bersihkan data aplikasi</string>
+    <string name="config_damaged">Berkas konfig rusak. Harap bersihkan data aplikasi</string>
     <string name="edit_list">Edit daftar</string>
     <string name="delete">Hapus</string>
     <string name="enabled">Aktif</string>
@@ -87,7 +87,7 @@
     <string name="app_choose_template">Pilih templat</string>
     <string name="app_choose_preset">Pilih preset</string>
     <string name="app_exclude_system_apps">Kecualikan apl sistem</string>
-    <string name="app_exclude_system_apps_summary">Matikan opsi ini hanya jika benar-benar diperlukan. Kemungkinan menyebabkan kerusakan jika dinonaktifkan</string>
+    <string name="app_exclude_system_apps_summary">Nonaktifkan opsi ini hanya jika benar-benar diperlukan. Kemungkinan menyebabkan kerusakan jika dinonaktifkan</string>
     <string name="app_template_using">Menggunakan %d templat</string>
     <string name="app_preset_using">Menggunakan %d preset</string>
     <string name="app_settings_preset_using">Menggunakan %d preset setelan</string>
@@ -144,13 +144,13 @@
     <string name="settings_module">Modul</string>
     <string name="settings_overwrite">Timpa</string>
     <string name="settings_overwritten">Ditimpa</string>
-    <string name="settings_overwrite_summary">Item kategori ini akan dipaksa diaktifkan jika tombol dicentang</string>
+    <string name="settings_overwrite_summary">Item kategori ini akan dipaksa aktif jika tombol diaktifkan</string>
     <string name="settings_default_value">Nilai default: %s</string>
     <string name="settings_data_isolation">Isolasi data</string>
     <string name="settings_data_isolation_summary">Data apl: %s\nVold data apl: %s\nPaksa mount: %s</string>
     <string name="settings_data_isolation_unsupported">Opsi ini hanya tersedia di Android 11 dan di atasnya</string>
-    <string name="settings_app_data_isolation">Isolasi data aplikasi</string>
-    <string name="settings_vold_app_data_isolation">Isolasi Vold data aplikasi</string>
+    <string name="settings_app_data_isolation">Isolasi data apl</string>
+    <string name="settings_vold_app_data_isolation">Isolasi Vold data apl</string>
     <string name="settings_warning">Peringatan</string>
     <string name="settings_vold_warning">Ini akan mengaktifkan fitur AOSP yang membuat direktori penyimpanan eksternal pribadi apl terisolasi. Ini dapat membantu meningkatkan penyembunyian apl meskipun dapat menyebabkan masalah stabilitas. Fitur ini dapat berhenti berfungsi kapan saja karena ditinggalkan oleh AOSP.</string>
     <string name="settings_change_require_root">Perubahan diperlukan izin root</string>
@@ -198,7 +198,7 @@
     <!-- Bulk config wizard -->
     <string name="title_bulk_config_wizard">Asisten konfigurasi massal</string>
     <!-- About -->
-    <string name="about_description">        Meskipun tidak tepat untuk mendeteksi instalasi aplikasi tertentu, tidak semua aplikasi yang menggunakan root mendukung nama paket acak. Dalam kasus ini, aplikasi terdeteksi yang menggunakan root (seperti Pemalsuan Lokasi dan Isolasi Data) dianggap sama dengan root itu sendiri.\n\nPada saat yang sama, beberapa aplikasi cerdas memanfaatkan celah untuk mendapatkan daftar aplikasi Anda, sehingga mereka bisa membangun profil tentang Anda.\n\nModul ini menyediakan beberapa metode untuk menguji apakah Anda telah menyembunyikan daftar aplikasi dengan baik. Selain itu, dapat berfungsi sebagai modul Xposed untuk menyembunyikan aplikasi tertentu atau menolak permintaan daftar aplikasi guna melindungi privasi Anda.
+    <string name="about_description">        Meskipun tidak tepat untuk mendeteksi pemasangan aplikasi tertentu, tidak semua aplikasi yang menggunakan root mendukung nama paket acak. Dalam kasus ini, aplikasi terdeteksi yang menggunakan root (seperti Pemalsuan Lokasi dan Isolasi Data) dianggap sama dengan root itu sendiri.\n\nPada saat yang sama, beberapa aplikasi cerdas memanfaatkan celah untuk mendapatkan daftar aplikasi Anda, sehingga mereka bisa membangun profil tentang Anda.\n\nModul ini menyediakan beberapa metode untuk menguji apakah Anda telah menyembunyikan daftar aplikasi dengan baik. Selain itu, dapat berfungsi sebagai modul Xposed untuk menyembunyikan aplikasi tertentu atau menolak permintaan daftar aplikasi guna melindungi privasi Anda.
     </string>
     <string name="about_fork_description">        Proyek HMA asli telah menjadi sumber tertutup dan kode terbaru mereka tidak memuat beberapa perubahan terbaru, jadi saya membuat percabangan ini untuk melanjutkannya sebagai sumber terbuka lagi.
     </string>
@@ -233,6 +233,6 @@
     <string name="color_blue_grey">Abu-abu kebiruan</string>
     <!-- Dark theme modes -->
     <string name="dark_theme">Tema gelap</string>
-    <string name="dark_theme_off">Selalu mati</string>
+    <string name="dark_theme_off">Selalu nonaktif</string>
     <string name="dark_theme_on">Selalu aktif</string>
 </resources>
