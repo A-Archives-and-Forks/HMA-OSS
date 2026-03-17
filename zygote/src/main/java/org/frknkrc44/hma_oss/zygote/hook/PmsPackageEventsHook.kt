@@ -6,7 +6,7 @@ import android.os.Bundle
 import org.frknkrc44.hma_oss.zygote.service.BulkHooker
 import org.frknkrc44.hma_oss.zygote.service.HMAService
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.PACKAGE_MANAGER_SERVICE_CLASS
-import org.frknkrc44.hma_oss.zygote.util.logI
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logI
 
 class PmsPackageEventsHook(private val service: HMAService) : IFrameworkHook {
     override val TAG = "PmsPackageEventsHook"

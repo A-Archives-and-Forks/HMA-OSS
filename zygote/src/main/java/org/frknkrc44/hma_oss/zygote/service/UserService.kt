@@ -10,9 +10,9 @@ import org.frknkrc44.hma_oss.common.BuildConfig
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getStaticIntField
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.verifyAppSignature
-import org.frknkrc44.hma_oss.zygote.util.logD
-import org.frknkrc44.hma_oss.zygote.util.logE
-import org.frknkrc44.hma_oss.zygote.util.logI
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logE
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logI
 import rikka.hidden.compat.ActivityManagerApis
 import rikka.hidden.compat.adapter.UidObserverAdapter
 

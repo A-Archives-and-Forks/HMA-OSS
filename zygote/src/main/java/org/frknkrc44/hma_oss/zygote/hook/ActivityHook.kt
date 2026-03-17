@@ -16,9 +16,9 @@ import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.ACTIVITY_STARTER_CLASS
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.ACTIVITY_TASK_SUPERVISOR_CLASS
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.COMPUTER_ENGINE_CLASS
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.PACKAGE_MANAGER_SERVICE_CLASS
-import org.frknkrc44.hma_oss.zygote.util.logD
-import org.frknkrc44.hma_oss.zygote.util.logI
-import org.frknkrc44.hma_oss.zygote.util.logV
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logI
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logV
 
 class ActivityHook(private val service: HMAService) : IFrameworkHook {
     override val TAG = "ActivityHook"

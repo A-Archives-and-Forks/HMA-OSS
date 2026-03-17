@@ -13,9 +13,9 @@ import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getObjectField
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.setBooleanField
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.PROCESS_LIST_CLASS
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.STORAGE_MANAGER_SERVICE_CLASS
-import org.frknkrc44.hma_oss.zygote.util.logD
-import org.frknkrc44.hma_oss.zygote.util.logE
-import org.frknkrc44.hma_oss.zygote.util.logI
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logE
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logI
 import java.util.Map
 
 @RequiresApi(Build.VERSION_CODES.R)

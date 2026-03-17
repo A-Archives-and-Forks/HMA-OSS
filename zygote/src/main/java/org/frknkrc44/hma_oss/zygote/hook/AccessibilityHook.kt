@@ -8,8 +8,8 @@ import org.frknkrc44.hma_oss.zygote.service.HMAService
 import org.frknkrc44.hma_oss.zygote.service.HookParam
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.ACCESSIBILITY_SERVICE_CLASS
-import org.frknkrc44.hma_oss.zygote.util.logD
-import org.frknkrc44.hma_oss.zygote.util.logE
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logE
 
 class AccessibilityHook(private val service: HMAService) : IFrameworkHook {
     override val TAG = "AccessibilityHook"

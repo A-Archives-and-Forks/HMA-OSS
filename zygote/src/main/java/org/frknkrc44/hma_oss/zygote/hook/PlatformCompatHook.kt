@@ -8,9 +8,9 @@ import org.frknkrc44.hma_oss.common.BuildConfig
 import org.frknkrc44.hma_oss.zygote.service.BulkHooker
 import org.frknkrc44.hma_oss.zygote.service.HMAService
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.PLATFORM_COMPAT_CLASS
-import org.frknkrc44.hma_oss.zygote.util.logD
-import org.frknkrc44.hma_oss.zygote.util.logE
-import org.frknkrc44.hma_oss.zygote.util.logI
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logE
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logI
 
 @RequiresApi(Build.VERSION_CODES.R)
 class PlatformCompatHook(private val service: HMAService) : IFrameworkHook {

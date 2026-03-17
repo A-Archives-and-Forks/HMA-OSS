@@ -40,11 +40,11 @@ import org.frknkrc44.hma_oss.zygote.hook.PmsHookTarget33
 import org.frknkrc44.hma_oss.zygote.hook.PmsHookTarget34
 import org.frknkrc44.hma_oss.zygote.hook.PmsPackageEventsHook
 import org.frknkrc44.hma_oss.zygote.hook.ZygoteHook
-import org.frknkrc44.hma_oss.zygote.util.logD
-import org.frknkrc44.hma_oss.zygote.util.logE
-import org.frknkrc44.hma_oss.zygote.util.logI
-import org.frknkrc44.hma_oss.zygote.util.logW
-import org.frknkrc44.hma_oss.zygote.util.logWithLevel
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logE
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logI
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logW
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logWithLevel
 import rikka.hidden.compat.ActivityManagerApis
 import rikka.hidden.compat.UserManagerApis
 import java.io.File

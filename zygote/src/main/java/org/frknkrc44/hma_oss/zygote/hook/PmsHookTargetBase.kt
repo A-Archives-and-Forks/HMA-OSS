@@ -15,8 +15,8 @@ import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.callMethod
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getCallingApps
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getPackageNameFromPackageSettings
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.COMPUTER_ENGINE_CLASS
-import org.frknkrc44.hma_oss.zygote.util.logD
-import org.frknkrc44.hma_oss.zygote.util.logV
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logV
 import org.frknkrc44.hma_oss.zygote.service.HMAServiceCache
 import java.util.concurrent.atomic.AtomicReference
 

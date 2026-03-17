@@ -14,8 +14,8 @@ import org.frknkrc44.hma_oss.zygote.service.HookParam
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.IMM_IMPL_CLASS
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.IMM_SERVICE_CLASS
-import org.frknkrc44.hma_oss.zygote.util.logD
-import org.frknkrc44.hma_oss.zygote.util.logV
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logV
 import java.util.Collections
 
 class ImmHook(private val service: HMAService) : IFrameworkHook {
