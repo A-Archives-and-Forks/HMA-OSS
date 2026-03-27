@@ -8,7 +8,7 @@ androidx-navigation = "2.9.7"
 vbpd = "2.0.4"
 r8_annotations = "v1.0.0"
 androidvmtools = "33b8aa9"
-zygoteloader = "7a7e52c0f2"
+zygoteloader = "bf5078e182"
 
 [plugins]
 agp-app = { id = "com.android.application", version.ref = "agp" }
