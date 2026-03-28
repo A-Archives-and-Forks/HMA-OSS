@@ -1,5 +1,6 @@
 package icu.nullptr.hidemyapplist.common
 
+import icu.nullptr.hidemyapplist.common.Constants.ENABLE_INTERNET_UNKNOWN
 import icu.nullptr.hidemyapplist.common.settings_presets.ReplacementItem
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -17,6 +18,7 @@ data class JsonConfig(
     var altVoldAppDataIsolation: Boolean = false,
     var skipSystemAppDataIsolation: Boolean = true,
     var packageQueryWorkaround: Boolean = false,
+    var enableInternet: Int = ENABLE_INTERNET_UNKNOWN,
     val templates: MutableMap<String, Template> = mutableMapOf(),
     val settingsTemplates: MutableMap<String, SettingsTemplate> = mutableMapOf(),
     val disabledHooks: MutableList<HookItem> = mutableListOf(),

@@ -3,6 +3,7 @@ package icu.nullptr.hidemyapplist.service
 import android.os.Build
 import android.util.Log
 import icu.nullptr.hidemyapplist.MyApp.Companion.hmaApp
+import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.JsonConfig
 import icu.nullptr.hidemyapplist.common.settings_presets.ReplacementItem
 import icu.nullptr.hidemyapplist.ui.util.showToast
@@ -149,6 +150,21 @@ object ConfigManager {
             saveConfig()
             showToast(R.string.settings_need_reboot)
         }
+
+    var enableInternet: Int
+        get() = config.enableInternet
+        set(value) {
+            config.enableInternet = value
+            saveConfig()
+        }
+
+    fun setEnableInternet(value: Boolean) {
+        enableInternet = if (value) {
+            Constants.ENABLE_INTERNET_ON
+        } else {
+            Constants.ENABLE_INTERNET_OFF
+        }
+    }
 
     fun importConfig(json: String) {
         config = JsonConfig.parse(json)

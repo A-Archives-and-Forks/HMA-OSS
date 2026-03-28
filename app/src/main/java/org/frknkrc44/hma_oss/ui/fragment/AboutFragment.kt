@@ -15,6 +15,8 @@ import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
 import com.bumptech.glide.Glide
 import dev.androidbroadcast.vbpd.viewBinding
+import icu.nullptr.hidemyapplist.common.Constants
+import icu.nullptr.hidemyapplist.service.ConfigManager
 import icu.nullptr.hidemyapplist.service.PrefManager
 import icu.nullptr.hidemyapplist.ui.util.AccessibilityUtils
 import icu.nullptr.hidemyapplist.ui.util.ThemeUtils.homeItemBackgroundColor
@@ -171,11 +173,15 @@ class AboutFragment : Fragment(R.layout.fragment_about) {
     fun addTranslatorItem(layout: LinearLayout, avatarUrl: String, name: String) {
         val newLayout = FragmentAboutListItemBinding.inflate(layoutInflater)
 
-        Glide.with(this)
-            .load(avatarUrl)
-            .placeholder(R.drawable.outline_info_24)
-            .circleCrop()
-            .into(newLayout.aboutPersonIcon)
+        if (ConfigManager.enableInternet == Constants.ENABLE_INTERNET_ON) {
+            Glide.with(this)
+                .load(avatarUrl)
+                .placeholder(R.drawable.outline_info_24)
+                .circleCrop()
+                .into(newLayout.aboutPersonIcon)
+        } else {
+            newLayout.aboutPersonIcon.isVisible = false
+        }
 
         newLayout.text1.text = name
         newLayout.text2.visibility = View.GONE

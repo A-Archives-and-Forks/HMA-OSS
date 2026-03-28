@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.androidbroadcast.vbpd.viewBinding
 import icu.nullptr.hidemyapplist.MyApp.Companion.hmaApp
+import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.data.fetchLatestUpdate
 import icu.nullptr.hidemyapplist.service.ConfigManager
 import icu.nullptr.hidemyapplist.service.PrefManager
@@ -284,7 +285,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
 
         lifecycleScope.launch {
-            loadUpdateDialog()
+            loadDialogs()
         }
     }
 
@@ -356,8 +357,36 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
     }
 
-    private fun loadUpdateDialog() {
-        if (hmaApp.updateDialogSkipped || PrefManager.disableUpdate || isTestBuild) return
+    private fun loadDialogs() {
+        if (ConfigManager.enableInternet == Constants.ENABLE_INTERNET_UNKNOWN) {
+            loadEnableInternetDialogLocked()
+            return
+        }
+
+        if (ConfigManager.enableInternet != Constants.ENABLE_INTERNET_ON ||
+                hmaApp.updateDialogSkipped || PrefManager.disableUpdate || isTestBuild) {
+            return
+        }
+
+        loadUpdateDialogLocked()
+    }
+
+    private fun loadEnableInternetDialogLocked() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setCancelable(false)
+            .setTitle(R.string.settings_enable_internet)
+            .setMessage(R.string.settings_enable_internet_summary)
+            .setPositiveButton(R.string.yes) { _, _ ->
+                ConfigManager.enableInternet = Constants.ENABLE_INTERNET_ON
+                loadUpdateDialogLocked()
+            }
+            .setNegativeButton(R.string.no) { _, _ ->
+                ConfigManager.enableInternet = Constants.ENABLE_INTERNET_OFF
+            }
+            .show()
+    }
+
+    private fun loadUpdateDialogLocked() {
         fetchLatestUpdate { updateInfo ->
             if (updateInfo.versionName != BuildConfig.VERSION_NAME) {
                 withContext(Dispatchers.Main) {

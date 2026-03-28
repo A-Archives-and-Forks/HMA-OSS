@@ -25,6 +25,7 @@ import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.JsonConfig
 import icu.nullptr.hidemyapplist.common.PropertyUtils
 import icu.nullptr.hidemyapplist.service.ConfigManager
+import icu.nullptr.hidemyapplist.service.ConfigManager.setEnableInternet
 import icu.nullptr.hidemyapplist.service.PrefManager
 import icu.nullptr.hidemyapplist.service.ServiceClient
 import icu.nullptr.hidemyapplist.ui.util.enabledString
@@ -99,6 +100,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), PreferenceFragmen
                 "skipSystemAppDataIsolation" -> ConfigManager.skipSystemAppDataIsolation
                 "disableActivityLaunchProtection" -> ConfigManager.disableActivityLaunchProtection
                 "forceMountData" -> ConfigManager.forceMountData
+                "enableInternet" -> ConfigManager.enableInternet == Constants.ENABLE_INTERNET_ON
                 "disableUpdate" -> PrefManager.disableUpdate
                 "packageQueryWorkaround" -> ConfigManager.packageQueryWorkaround
                 else -> throw IllegalArgumentException("Invalid key: $key")
@@ -137,6 +139,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), PreferenceFragmen
                 "detailLog" -> ConfigManager.detailLog = value
                 "errorOnlyLog" -> ConfigManager.errorOnlyLog = value
                 "forceMountData" -> ConfigManager.forceMountData = value
+                "enableInternet" -> setEnableInternet(value)
                 "disableUpdate" -> PrefManager.disableUpdate = value
                 "hideIcon" -> PrefManager.hideIcon = value
                 "bypassRiskyPackageWarning" -> PrefManager.bypassRiskyPackageWarning = value
