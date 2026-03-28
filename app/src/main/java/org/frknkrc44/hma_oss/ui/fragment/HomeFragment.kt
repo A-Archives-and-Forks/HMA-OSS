@@ -97,6 +97,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             setupToolbar(
                 toolbar = this,
                 title = getString(R.string.app_name),
+                isHomeToolbar = true,
             )
             // isTitleCentered = true
         }
@@ -197,7 +198,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                     .setMessage(
                         getString(R.string.about_how_to_use_description_1) +
                                 "\n\n" +
-                                getString(R.string.about_how_to_use_description_2))
+                                getString(R.string.about_how_to_use_description_2) +
+                                "\n\n" +
+                                getString(R.string.about_how_to_use_description_3))
                     .setNegativeButton(android.R.string.ok, null)
                     .show()
             }
