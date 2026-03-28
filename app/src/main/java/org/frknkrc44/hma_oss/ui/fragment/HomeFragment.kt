@@ -25,6 +25,7 @@ import icu.nullptr.hidemyapplist.ui.util.ThemeUtils.getColor
 import icu.nullptr.hidemyapplist.ui.util.ThemeUtils.homeItemBackgroundColor
 import icu.nullptr.hidemyapplist.ui.util.ThemeUtils.themeColor
 import icu.nullptr.hidemyapplist.ui.util.contentResolver
+import icu.nullptr.hidemyapplist.ui.util.dp2Px
 import icu.nullptr.hidemyapplist.ui.util.isTestBuild
 import icu.nullptr.hidemyapplist.ui.util.navigate
 import icu.nullptr.hidemyapplist.ui.util.setEdge2EdgeFlags
@@ -132,9 +133,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         with(binding.howToUse.root.parent as ViewGroup) {
             val childCount = childCount
 
-            val softCorner: Float = resources.displayMetrics.density * 24
-            val squareCorner: Float = resources.displayMetrics.density * 8
-            val pad = (resources.displayMetrics.density * 16).toInt()
+            val softCorner: Float = dp2Px(resources, 24)
+            val squareCorner: Float = dp2Px(resources, 8)
+            val pad = dp2Px(resources, 16).toInt()
 
             for (i in 0..< childCount) {
                 getChildAt(i).apply {
