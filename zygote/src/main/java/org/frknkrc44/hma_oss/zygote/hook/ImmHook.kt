@@ -1,6 +1,7 @@
 package org.frknkrc44.hma_oss.zygote.hook
 
 import android.content.ComponentName
+import android.content.pm.PackageManager
 import android.os.Binder
 import android.os.Build
 import android.provider.Settings
@@ -278,7 +279,9 @@ class ImmHook(private val service: HMAService) : IFrameworkHook {
 
     private fun isIMExists(packageName: String, inUserId: Int? = null): Boolean {
         val userId = inUserId ?: Binder.getCallingUserHandle().hashCode()
-        return Utils.getPackageUidCompat(service.pms, packageName, 0L, userId) >= 0
+        return Utils.binderLocalScope {
+            Utils.getPackageUidCompat(service.pms, packageName, 0L, userId) >= 0
+        }
     }
 
     private fun warnNotInstalledKeyboard(methodName: String, packageName: String) {
