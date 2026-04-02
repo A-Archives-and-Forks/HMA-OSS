@@ -248,7 +248,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
         methodName: String,
         findCallingUid: () -> Int?,
         findTargetApp: () -> String?,
-        findCallingApps: (Int) -> Array<String>,
+        findCallingApps: (Int) -> Array<String>?,
         applyReturnValue: () -> Unit,
     ) {
         val callingUid = findCallingUid()
@@ -262,7 +262,7 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
             return
         }
         val callingApps = findCallingApps(callingUid)
-        val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
+        val caller = callingApps?.firstOrNull { service.shouldHide(it, targetApp) }
         if (caller != null) {
             logD(TAG, "@$methodName caller: $callingUid $caller, target: $targetApp")
             applyReturnValue()

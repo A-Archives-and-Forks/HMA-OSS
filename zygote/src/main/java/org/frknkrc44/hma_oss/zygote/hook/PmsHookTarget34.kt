@@ -74,7 +74,7 @@ class PmsHookTarget34(service: HMAService) : PmsHookTargetBase(service) {
                     { getPackageNameFromPackageSettings(param.getArgument(4)) },
                     {
                         Utils.binderLocalScope {
-                            getPackagesForUidMethod.invoke(param.getArgument(1), it) as Array<String>
+                            getPackagesForUidMethod.invoke(param.getArgument(1), it) as Array<String>?
                         }
                     },
                     { param.result = true },
