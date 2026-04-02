@@ -13,6 +13,7 @@ import org.frknkrc44.hma_oss.zygote.service.BulkHooker
 import org.frknkrc44.hma_oss.zygote.service.HMAService
 import org.frknkrc44.hma_oss.zygote.service.HMAServiceCache
 import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
+import org.frknkrc44.hma_oss.zygote.util.Logcat.logI
 import org.frknkrc44.hma_oss.zygote.util.Logcat.logV
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.callMethod
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getCallingApps
@@ -82,23 +83,13 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                         COMPUTER_ENGINE_CLASS,
                         "generatePackageInfo",
                     ) { param ->
-                        val callingUid = Binder.getCallingUid()
-                        val packageSettings = param.getArgument(1)
-                        val targetApp = getPackageNameFromPackageSettings(packageSettings) ?: return@hookBefore
-                        if (HMAServiceCache.instance.shouldHideFromUid(callingUid, targetApp) == true) {
-                            param.result = null
-                            service.increasePMFilterCount(callingUid)
-                            logD(TAG, "@generatePackageInfo caller cache: $callingUid, target: $targetApp")
-                            return@hookBefore
-                        }
-                        val callingApps = getCallingApps(service, callingUid)
-                        val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
-                        if (caller != null) {
-                            logD(TAG, "@generatePackageInfo caller: $callingUid $caller, target: $targetApp")
-                            param.result = null
-                            HMAServiceCache.instance.putShouldHideUidCache(callingUid, caller, targetApp)
-                            service.increasePMFilterCount(caller)
-                        }
+                        applyPackageHiding(
+                            param.methodName,
+                            { Binder.getCallingUid() },
+                            { getPackageNameFromPackageSettings(param.getArgument(1)) },
+                            { getCallingApps(service, it) },
+                            { param.result = null },
+                        )
                     }
                 }
 
@@ -108,23 +99,13 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                     COMPUTER_ENGINE_CLASS,
                     "addPackageHoldingPermissions",
                 ) { param ->
-                    val callingUid = Binder.getCallingUid()
-                    val packageSettings = param.getArgument(2)
-                    val targetApp = getPackageNameFromPackageSettings(packageSettings) ?: return@hookBefore
-                    if (HMAServiceCache.instance.shouldHideFromUid(callingUid, targetApp) == true) {
-                        param.result = null
-                        service.increasePMFilterCount(callingUid)
-                        logD(TAG, "@addPackageHoldingPermissions caller cache: $callingUid, target: $targetApp")
-                        return@hookBefore
-                    }
-                    val callingApps = getCallingApps(service, callingUid)
-                    val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
-                    if (caller != null) {
-                        logD(TAG, "@addPackageHoldingPermissions caller: $callingUid $caller, target: $targetApp")
-                        param.result = null
-                        HMAServiceCache.instance.putShouldHideUidCache(callingUid, caller, targetApp)
-                        service.increasePMFilterCount(caller)
-                    }
+                    applyPackageHiding(
+                        param.methodName,
+                        { Binder.getCallingUid() },
+                        { getPackageNameFromPackageSettings(param.getArgument(2)) },
+                        { getCallingApps(service, it) },
+                        { param.result = null },
+                    )
                 }
 
                 hookBefore(
@@ -162,48 +143,26 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                     COMPUTER_ENGINE_CLASS,
                     "getPackageInfoInternal",
                 ) { param ->
-                    val targetApp = param.args.firstOrNull { it is String } as? String ?: return@hookBefore
-                    val callingUid = param.args.firstOrNull { it is Int } as? Int ?: Binder.getCallingUid()
-                    if (callingUid == Constants.UID_SYSTEM) return@hookBefore
-                    logV(TAG, "@${param.methodName} incoming query: $callingUid => $targetApp")
-                    if (HMAServiceCache.instance.shouldHideFromUid(callingUid, targetApp) == true) {
-                        param.result = null
-                        service.increasePMFilterCount(callingUid)
-                        logD(TAG, "@${param.methodName} caller cache: $callingUid, target: $targetApp")
-                        return@hookBefore
-                    }
-                    val callingApps = getCallingApps(service, callingUid)
-                    val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
-                    if (caller != null) {
-                        logD(TAG, "@${param.methodName} caller: $callingUid $caller, target: $targetApp")
-                        param.result = null
-                        HMAServiceCache.instance.putShouldHideUidCache(callingUid, caller, targetApp)
-                        service.increasePMFilterCount(caller)
-                    }
+                    applyPackageHiding(
+                        param.methodName,
+                        { param.args.firstOrNull { it is Int } as? Int },
+                        { param.args.firstOrNull { it is String } as? String },
+                        { getCallingApps(service, it) },
+                        { param.result = null },
+                    )
                 }
 
                 hookBefore(
                     COMPUTER_ENGINE_CLASS,
                     "getApplicationInfoInternal",
                 ) { param ->
-                    val targetApp = param.args.firstOrNull { it is String } as? String ?: return@hookBefore
-                    val callingUid = param.args.firstOrNull { it is Int } as? Int ?: Binder.getCallingUid()
-                    if (callingUid == Constants.UID_SYSTEM) return@hookBefore
-                    logV(TAG, "@${param.methodName} incoming query: $callingUid => $targetApp")
-                    if (HMAServiceCache.instance.shouldHideFromUid(callingUid, targetApp) == true) {
-                        param.result = null
-                        service.increasePMFilterCount(callingUid)
-                        logD(TAG, "@${param.methodName} caller cache: $callingUid, target: $targetApp")
-                        return@hookBefore
-                    }
-                    val callingApps = getCallingApps(service, callingUid)
-                    val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
-                    if (caller != null) {
-                        logD(TAG, "@${param.methodName} caller: $callingUid $caller, target: $targetApp")
-                        param.result = null
-                        HMAServiceCache.instance.putShouldHideUidCache(callingUid, caller, targetApp)
-                        service.increasePMFilterCount(caller)
-                    }
+                    applyPackageHiding(
+                        param.methodName,
+                        { param.args.firstOrNull { it is Int } as? Int },
+                        { param.args.firstOrNull { it is String } as? String },
+                        { getCallingApps(service, it) },
+                        { param.result = null },
+                    )
                 }
             }
 
@@ -282,6 +241,35 @@ abstract class PmsHookTargetBase(protected val service: HMAService) : IFramework
                     break
                 }
             }
+        }
+    }
+
+    fun applyPackageHiding(
+        methodName: String,
+        findCallingUid: () -> Int?,
+        findTargetApp: () -> String?,
+        findCallingApps: (Int) -> Array<String>,
+        applyReturnValue: () -> Unit,
+    ) {
+        val callingUid = findCallingUid()
+        if (callingUid == null || callingUid == Constants.UID_SYSTEM) return
+        val targetApp = findTargetApp() ?: return
+        logV(TAG, "@$methodName incoming query: $callingUid => $targetApp")
+        if (HMAServiceCache.instance.shouldHideFromUid(callingUid, targetApp) == true) {
+            applyReturnValue()
+            service.increasePMFilterCount(callingUid)
+            logD(TAG, "@$methodName caller cache: $callingUid, target: $targetApp")
+            return
+        }
+        val callingApps = findCallingApps(callingUid)
+        val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
+        if (caller != null) {
+            logD(TAG, "@$methodName caller: $callingUid $caller, target: $targetApp")
+            applyReturnValue()
+            val last = lastFilteredApp.getAndSet(caller)
+            if (last != caller) logI(TAG, "@${methodName}: query from $caller")
+            HMAServiceCache.instance.putShouldHideUidCache(callingUid, caller, targetApp)
+            service.increasePMFilterCount(caller)
         }
     }
 }

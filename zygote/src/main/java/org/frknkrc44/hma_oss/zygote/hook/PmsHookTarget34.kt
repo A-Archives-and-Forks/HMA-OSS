@@ -4,17 +4,15 @@ import android.content.pm.PackageInstaller
 import android.os.Binder
 import android.os.Build
 import androidx.annotation.RequiresApi
-import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.Constants.VENDING_PACKAGE_NAME
 import icu.nullptr.hidemyapplist.common.Utils
 import org.frknkrc44.hma_oss.zygote.service.BulkHooker
 import org.frknkrc44.hma_oss.zygote.service.HMAService
-import org.frknkrc44.hma_oss.zygote.service.HMAServiceCache
-import org.frknkrc44.hma_oss.zygote.util.Logcat.logD
 import org.frknkrc44.hma_oss.zygote.util.Logcat.logI
-import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.findConstructor
 import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.findMethod
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getCallingApps
+import org.frknkrc44.hma_oss.zygote.util.Utils4Zygote.getPackageNameFromPackageSettings
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.APPS_FILTER_IMPL_CLASS
 import org.frknkrc44.hma_oss.zygote.util.ZygoteConstants.PACKAGE_MANAGER_SERVICE_CLASS
 
@@ -70,28 +68,17 @@ class PmsHookTarget34(service: HMAService) : PmsHookTargetBase(service) {
                 APPS_FILTER_IMPL_CLASS,
                 "shouldFilterApplication",
             ) { param ->
-                val callingUid = param.getArgument(2) as Int
-                if (callingUid == Constants.UID_SYSTEM) return@hookBefore
-                val targetApp = Utils4Zygote.getPackageNameFromPackageSettings(param.getArgument(4)) // PackageSettings <- PackageStateInternal
-                if (HMAServiceCache.instance.shouldHideFromUid(callingUid, targetApp) == true) {
-                    param.result = true
-                    service.increasePMFilterCount(callingUid)
-                    logD(TAG, "@shouldFilterApplication caller cache: $callingUid, target: $targetApp")
-                    return@hookBefore
-                }
-                val snapshot = param.getArgument(1)
-                val callingApps = Utils.binderLocalScope {
-                    getPackagesForUidMethod.invoke(snapshot, callingUid) as Array<String>?
-                } ?: return@hookBefore
-                val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
-                if (caller != null) {
-                    param.result = true
-                    HMAServiceCache.instance.putShouldHideUidCache(callingUid, caller, targetApp!!)
-                    service.increasePMFilterCount(caller)
-                    val last = lastFilteredApp.getAndSet(caller)
-                    if (last != caller) logI(TAG, "@shouldFilterApplication: query from $caller")
-                    logD(TAG, "@shouldFilterApplication caller: $callingUid $caller, target: $targetApp")
-                }
+                applyPackageHiding(
+                    param.methodName,
+                    { param.getArgument(2) as Int? },
+                    { getPackageNameFromPackageSettings(param.getArgument(4)) },
+                    {
+                        Utils.binderLocalScope {
+                            getPackagesForUidMethod.invoke(param.getArgument(1), it) as Array<String>
+                        }
+                    },
+                    { param.result = true },
+                )
             }
 
             // AOSP exploit - https://github.com/aosp-mirror/platform_frameworks_base/commit/5bc482bd99ea18fe0b4064d486b29d5ae2d65139
@@ -106,25 +93,13 @@ class PmsHookTarget34(service: HMAService) : PmsHookTargetBase(service) {
                 altNames.declaringClass.name,
                 altNames.name,
             ) { param ->
-                val callingUid = Binder.getCallingUid()
-                if (callingUid == Constants.UID_SYSTEM) return@hookBefore
-                val targetApp = param.getArgument(1).toString()
-                if (HMAServiceCache.instance.shouldHideFromUid(callingUid, targetApp) == true) {
-                    param.result = null
-                    service.increasePMFilterCount(callingUid)
-                    logD(TAG, "@getArchivedPackageInternal caller cache: $callingUid, target: $targetApp")
-                    return@hookBefore
-                }
-                val callingApps = Utils4Zygote.getCallingApps(service, callingUid)
-                val caller = callingApps.firstOrNull { service.shouldHide(it, targetApp) }
-                if (caller != null) {
-                    param.result = null
-                    HMAServiceCache.instance.putShouldHideUidCache(callingUid, caller, targetApp)
-                    service.increasePMFilterCount(caller)
-                    val last = lastFilteredApp.getAndSet(caller)
-                    if (last != caller) logI(TAG, "@getArchivedPackageInternal: query from $caller")
-                    logD(TAG, "@getArchivedPackageInternal caller: $callingUid $caller, target: $targetApp")
-                }
+                applyPackageHiding(
+                    param.methodName,
+                    { Binder.getCallingUid() },
+                    { param.getArgument(1).toString() },
+                    { getCallingApps(service, it) },
+                    { param.result = null },
+                )
             }
         }
 
