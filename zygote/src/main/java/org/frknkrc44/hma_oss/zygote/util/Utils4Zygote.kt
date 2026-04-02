@@ -98,7 +98,9 @@ object Utils4Zygote {
         return service
     }
 
-    fun getPackageNameFromPackageSettings(packageSettings: Any): String? {
+    fun getPackageNameFromPackageSettings(packageSettings: Any?): String? {
+        if (packageSettings == null) return null
+
         return try {
             callMethod(packageSettings, "getPackageName") as String?
         } catch (_: Throwable) {
