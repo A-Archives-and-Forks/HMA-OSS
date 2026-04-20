@@ -19,9 +19,9 @@ import androidx.preference.SwitchPreferenceCompat
 import com.google.android.material.color.DynamicColors
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.androidbroadcast.vbpd.viewBinding
+import icu.nullptr.hidemyapplist.MyApp.Companion.hmaApp
 import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.PropertyUtils
-import icu.nullptr.hidemyapplist.hmaApp
 import icu.nullptr.hidemyapplist.service.ConfigManager
 import icu.nullptr.hidemyapplist.service.PrefManager
 import icu.nullptr.hidemyapplist.service.ServiceClient
@@ -97,6 +97,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), PreferenceFragmen
                 "skipSystemAppDataIsolation" -> ConfigManager.skipSystemAppDataIsolation
                 "disableActivityLaunchProtection" -> ConfigManager.disableActivityLaunchProtection
                 "forceMountData" -> ConfigManager.forceMountData
+                "enableInternet" -> PrefManager.enableInternet == Constants.ENABLE_INTERNET_ON
                 "disableUpdate" -> PrefManager.disableUpdate
                 "packageQueryWorkaround" -> ConfigManager.packageQueryWorkaround
                 else -> throw IllegalArgumentException("Invalid key: $key")
@@ -128,6 +129,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), PreferenceFragmen
                 "detailLog" -> ConfigManager.detailLog = value
                 "errorOnlyLog" -> ConfigManager.errorOnlyLog = value
                 "forceMountData" -> ConfigManager.forceMountData = value
+                "enableInternet" -> PrefManager.setEnableInternet(value)
                 "disableUpdate" -> PrefManager.disableUpdate = value
                 "hideIcon" -> PrefManager.hideIcon = value
                 "bypassRiskyPackageWarning" -> PrefManager.bypassRiskyPackageWarning = value
@@ -256,7 +258,7 @@ class SettingsFragment : Fragment(R.layout.fragment_settings), PreferenceFragmen
                     it.summary = if (!TextUtils.isEmpty(locale.script)) locale.getDisplayScript(userLocale) else locale.getDisplayName(userLocale)
                 }
                 it.setOnPreferenceChangeListener { _, newValue ->
-                    val locale = getLocale()
+                    val locale = getLocale(newValue as String)
                     val config = resources.configuration
                     config.setLocale(locale)
                     hmaApp.resources.updateConfiguration(config, resources.displayMetrics)

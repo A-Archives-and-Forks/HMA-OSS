@@ -2,8 +2,11 @@ package icu.nullptr.hidemyapplist.service
 
 import android.os.Bundle
 import android.os.IBinder
+import android.os.ParcelFileDescriptor
 import android.util.Log
+import icu.nullptr.hidemyapplist.common.Constants
 import icu.nullptr.hidemyapplist.common.IHMAService
+import java.io.FileInputStream
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
@@ -15,8 +18,8 @@ object ServiceClient : IHMAService, IBinder.DeathRecipient {
     private class ServiceProxy(private val obj: IHMAService) : InvocationHandler {
         override fun invoke(proxy: Any?, method: Method, args: Array<out Any?>?): Any? {
             val result = method.invoke(obj, *args.orEmpty())
-            if (result == null) Log.i(TAG, "Call service method ${method.name}")
-            else Log.i(TAG, "Call service method ${method.name} with result " + result.toString().take(20))
+            if (result == null) Log.d(TAG, "Call service method ${method.name}")
+            else Log.d(TAG, "Call service method ${method.name} with result " + result.toString().take(20))
             return result
         }
     }
@@ -44,7 +47,14 @@ object ServiceClient : IHMAService, IBinder.DeathRecipient {
 
     override fun getFilterCount() = service?.filterCount ?: 0
 
-    override fun getLogs() = service?.logs
+    override fun getLogs(): String? {
+        val parcelFD = readFD(Constants.PARCEL_TYPE_LOG) ?: return service?.logs
+        val readStream = FileInputStream(parcelFD.fileDescriptor)
+        return readStream.readBytes().decodeToString().also {
+            readStream.close()
+            parcelFD.close()
+        }
+    }
 
     override fun clearLogs() {
         service?.clearLogs()
@@ -57,7 +67,14 @@ object ServiceClient : IHMAService, IBinder.DeathRecipient {
     override fun getPackagesForPreset(presetName: String) =
         service?.getPackagesForPreset(presetName)
 
-    override fun readConfig() = service?.readConfig()
+    override fun readConfig(): String? {
+        val parcelFD = service?.readFD(Constants.PARCEL_TYPE_CONFIG) ?: return service?.readConfig()
+        val readStream = FileInputStream(parcelFD.fileDescriptor)
+        return readStream.readBytes().decodeToString().also {
+            readStream.close()
+            parcelFD.close()
+        }
+    }
 
     override fun writeConfig(json: String) {
         service?.writeConfig(json)
@@ -98,5 +115,19 @@ object ServiceClient : IHMAService, IBinder.DeathRecipient {
 
     override fun clearFilterStats() {
         service?.clearFilterStats()
+    }
+
+    /**
+     * Get the current service `BuildConfig.APP_VERSION_NAME`.
+     * Returns `null` if there is no service connection or an old version is installed.
+     */
+    override fun getServiceVersionName() = try {
+        service?.serviceVersionName
+    } catch (_: Throwable) { null }
+
+    override fun readFD(type: Int) = service?.readFD(type)
+
+    override fun writeFD(type: Int, fd: ParcelFileDescriptor) {
+        service?.writeFD(type, fd)
     }
 }

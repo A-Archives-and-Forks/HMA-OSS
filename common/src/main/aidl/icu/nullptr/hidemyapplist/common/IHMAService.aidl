@@ -6,6 +6,7 @@ interface IHMAService {
 
     void writeConfig(String json) = 1;
 
+    // config version
     int getServiceVersion() = 2;
 
     int getFilterCount() = 3;
@@ -37,4 +38,14 @@ interface IHMAService {
     String getDetailedFilterStats() = 16;
 
     void clearFilterStats() = 17;
+
+    // service version
+    String getServiceVersionName() = 18;
+
+    // only used for Zygisk
+    // String[] getLoadedHooks() = 19;
+
+    ParcelFileDescriptor readFD(int type) = 20;
+
+    void writeFD(int type, in ParcelFileDescriptor fd) = 21;
 }
